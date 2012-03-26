@@ -1,0 +1,17 @@
+2012-03-25 Tao Yu <yut616@gmail.com> 
+ 	* create kpfs.conf, it is json format, we will get consumer key and secret from it firstly.
+	* we will put mount path in kpfs.conf, and pass it to fuse_main.
+
+2012-03-24 Tao Yu <yut616@gmail.com>
+	* use hash table to store sub node for each node, and I could search it by hash iter.
+	* if prepare the whole dir when start, it could show all dirs; 
+	* if do not prepare whole dir when start, and get dir in readdir, there will be a "reused nonce" error.
+
+2012-03-21 Tao Yu <yut616@gmail.com>
+	* write "parse dir", now it could get whole dirs 
+
+2012-03-10 Tao Yu <yut616@gmail.com>
+	* get the access token, and the oauth verifier is not MUST option
+
+2012-03-08 Tao Yu <yut616@gmail.com>
+	* use liboauth to send oauth request and parse response
