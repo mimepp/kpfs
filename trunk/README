@@ -10,7 +10,7 @@ o download:
 
 o prepare before configure
   please install depends, on ubuntu e.g.:
-  sudo apt-get install gtk-doc-tools liboauth-dev libfuse-dev libjson0-dev libcurl4-openssl-dev 
+  sudo apt-get install gtk-doc-tools libfuse-dev libjson0-dev libcurl4-nss-dev liboauth-dev
 
   - liboauth will be used for oauth to kuaipan.cn
   - json-c will be used for parse response of request to kuaipan, and load/save kpfs.conf and kpfs_oauth.json
