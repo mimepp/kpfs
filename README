@@ -1,4 +1,4 @@
-kpfs is a filesystem for acessing kuaipan.cn based on FUSE.
+kpfs is a filesystem for accessing kuaipan.cn based on FUSE.
 =====================================================
 (You can use it in commercial software, but please let me know.)
 This application is dedicated to my lovely son (Hean Yu).
