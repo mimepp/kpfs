@@ -24,6 +24,7 @@
 #ifndef	__KPFS_H__
 #define	__KPFS_H__
 
+#define KPFS_APP_NAME			"kpfs"
 #define KPFS_VERSION			"0.1"
 
 #define KPFS_CONSUMER_KEY		"xc8D2NfL9c53vkrP"
@@ -38,6 +39,8 @@
 
 #define KPFS_MAX_PATH			(512)
 #define KPFS_MAX_BUF			(4096)
+#define KPFS_CURL_LOW_SPEED_LIMIT	(1)
+#define KPFS_CURL_LOW_SPEED_TIMEOUT	(60)
 
 #define KPFS_HTTP_GET			"GET"
 #define KPFS_HTTP_POST			"POST"
@@ -85,9 +88,9 @@
 #define KPFS_CONF_ID_CONSUMER_SECRET	"consumer_secret"
 #define KPFS_CONF_ID_MOUNT_POINT	"mount_point"
 #define KPFS_CONF_ID_OAUTH_JSON_FILE	"oauth_json_file"
-#define KPFS_CONF_ID_LOG_PATH		"log_path"
+#define KPFS_CONF_ID_WRITABLE_TMP_PATH	"writable_tmp_path"
 
-#define KPFS_DEFAULT_LOG_PATH		"/tmp"
+#define KPFS_DEFAULT_WRITABLE_TMP_PATH	"/tmp"
 #define KPFS_DEFAULT_OAUTH_JSON_FILE	"kpfs_oauth.json"
 
 int kpfs_file_log(const char *fmt, ...);
@@ -105,6 +108,8 @@ int kpfs_file_log(const char *fmt, ...);
 #define KPFS_SAFE_FREE(a) { if (a) {free(a); a = NULL;} }
 
 #define KPFS_LOG_FILE_NAME		"kpfs.log"
+
+#define KPFS_COOKIE_FILE_NAME		"cookie.txt"
 
 typedef enum {
 	KPFS_RET_FAIL = -1,

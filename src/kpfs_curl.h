@@ -24,4 +24,5 @@
 #ifndef	__KPFS_CURL_H__
 #define	__KPFS_CURL_H__
 
+int kpfs_curl_range_get(const char *url, char *buf, curl_off_t start_pos, curl_off_t end_pos);
 #endif

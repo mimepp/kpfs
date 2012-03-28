@@ -3,5 +3,5 @@
 	"consumer_secret": "p7Lo7Q6XBMipbHBw",
 	"mount_point": "/tmp/kpfs",
 	"oauth_json_file": "/tmp/kpfs_oauth.json",
-	"log_path": "/tmp"
+	"writable_tmp_path": "/tmp"
 }

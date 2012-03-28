@@ -32,14 +32,14 @@ struct kpfs_conf_t {
 	char consumer_secret[64];
 	char mount_point[KPFS_MAX_PATH];
 	char oauth_json_file[KPFS_MAX_PATH];
-	char log_path[KPFS_MAX_PATH];
+	char writable_tmp_path[KPFS_MAX_PATH];
 };
 
 char *kpfs_conf_get_consumer_key();
 char *kpfs_conf_get_consumer_secret();
 char *kpfs_conf_get_mount_point();
 char *kpfs_conf_get_oauth_json_file();
-char *kpfs_conf_get_log_path();
+char *kpfs_conf_get_writable_tmp_path();
 kpfs_ret kpfs_conf_load(char *file);
 void kpfs_conf_dump();
 #endif

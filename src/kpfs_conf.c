@@ -55,9 +55,9 @@ char *kpfs_conf_get_oauth_json_file()
 	return g_kpfs_conf.oauth_json_file;
 }
 
-char *kpfs_conf_get_log_path()
+char *kpfs_conf_get_writable_tmp_path()
 {
-	return g_kpfs_conf.log_path;
+	return g_kpfs_conf.writable_tmp_path;
 }
 
 static kpfs_ret kpfs_conf_parse_json(const char *buf)
@@ -87,9 +87,9 @@ static kpfs_ret kpfs_conf_parse_json(const char *buf)
 		} else if (!strcmp(key, KPFS_CONF_ID_OAUTH_JSON_FILE)) {
 			if (json_type_string == json_object_get_type(val))
 				snprintf(g_kpfs_conf.oauth_json_file, sizeof(g_kpfs_conf.oauth_json_file), "%s", json_object_get_string(val));
-		} else if (!strcmp(key, KPFS_CONF_ID_LOG_PATH)) {
+		} else if (!strcmp(key, KPFS_CONF_ID_WRITABLE_TMP_PATH)) {
 			if (json_type_string == json_object_get_type(val))
-				snprintf(g_kpfs_conf.log_path, sizeof(g_kpfs_conf.log_path), "%s", json_object_get_string(val));
+				snprintf(g_kpfs_conf.writable_tmp_path, sizeof(g_kpfs_conf.writable_tmp_path), "%s", json_object_get_string(val));
 		}
 	}
 	json_object_put(jobj);
@@ -104,8 +104,8 @@ static kpfs_ret kpfs_conf_parse_json(const char *buf)
 		snprintf(g_kpfs_conf.consumer_secret, sizeof(g_kpfs_conf.consumer_secret), "%s", KPFS_CONSUMER_SECRET);
 	if (g_kpfs_conf.oauth_json_file[0] == '\0')
 		snprintf(g_kpfs_conf.oauth_json_file, sizeof(g_kpfs_conf.oauth_json_file), "%s", KPFS_DEFAULT_OAUTH_JSON_FILE);
-	if (g_kpfs_conf.log_path[0] == '\0')
-		snprintf(g_kpfs_conf.log_path, sizeof(g_kpfs_conf.log_path), "%s", KPFS_DEFAULT_LOG_PATH);
+	if (g_kpfs_conf.writable_tmp_path[0] == '\0')
+		snprintf(g_kpfs_conf.writable_tmp_path, sizeof(g_kpfs_conf.writable_tmp_path), "%s", KPFS_DEFAULT_WRITABLE_TMP_PATH);
 
 	return KPFS_RET_OK;
 }
@@ -151,5 +151,5 @@ void kpfs_conf_dump()
 	KPFS_LOG("\tconsumer_secret: %s\n", g_kpfs_conf.consumer_secret);
 	KPFS_LOG("\tmount_point: %s\n", g_kpfs_conf.mount_point);
 	KPFS_LOG("\toauth_json_file: %s\n", g_kpfs_conf.oauth_json_file);
-	KPFS_LOG("\tlog_path: %s\n", g_kpfs_conf.log_path);
+	KPFS_LOG("\twritable_tmp_path: %s\n", g_kpfs_conf.writable_tmp_path);
 }
