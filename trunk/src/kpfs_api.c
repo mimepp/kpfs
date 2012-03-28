@@ -75,7 +75,7 @@ char *kpfs_api_metadata(const char *path)
 	char fullpath[1024] = { 0 };
 
 	snprintf(fullpath, sizeof(fullpath), "%s%s", KPFS_API_METADATA "/" KPFS_API_ROOT, path);
-	KPFS_FILE_LOG("fullpath %s:\n", fullpath);
+	KPFS_FILE_LOG("fullpath: %s\n", fullpath);
 	return kpfs_api_common_request(fullpath);
 }
 
@@ -85,34 +85,31 @@ char *kpfs_api_download_link_create(const char *path)
 	char *t_secret = kpfs_oauth_token_secret_get();
 	char *url = KPFS_API_DOWNLOAD_FILE;
 	char *req_url = NULL;
-	char *reply = NULL;
 	char *ret = NULL;
+	char *url_with_path = NULL;
+	int len = 0;
+	int malloc_more_room = 100;
 
 	if (NULL == path)
 		return ret;
 
 	KPFS_FILE_LOG("request url: %s ...\n", url);
+	len = strlen(url) + strlen(KPFS_API_ROOT) + strlen(path) + malloc_more_room;
+	url_with_path = calloc(len, 1);
+	if (NULL == url_with_path)
+		return ret;
+
+	snprintf(url_with_path, len, "%s?root=%s&path=%s", url, KPFS_API_ROOT, path);
 
 	req_url =
-	    oauth_sign_url2(url, NULL, OA_HMAC, NULL, (const char *)kpfs_conf_get_consumer_key(), (const char *)kpfs_conf_get_consumer_secret(), t_key,
-			    t_secret);
+	    oauth_sign_url2(url_with_path, NULL, OA_HMAC, NULL, (const char *)kpfs_conf_get_consumer_key(), (const char *)kpfs_conf_get_consumer_secret(),
+			    t_key, t_secret);
 	if (!req_url) {
-		goto error_out;
+		return ret;
 	}
 
-	KPFS_FILE_LOG("real url: %s.\n", req_url);
-
-	reply = oauth_http_get(req_url, NULL);
-
-	if (!reply) {
-		goto error_out;
-	}
-
-	KPFS_FILE_LOG("response: %s\n", reply);
-	ret = reply;
-
-error_out:
-	KPFS_SAFE_FREE(req_url);
+	KPFS_FILE_LOG("download link: %s.\n", req_url);
+	ret = req_url;
 
 	return ret;
 }

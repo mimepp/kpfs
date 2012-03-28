@@ -55,7 +55,7 @@ int kpfs_file_log(const char *fmt, ...)
 	va_end(ap);
 
 	snprintf(buf, sizeof(buf), "[%s] %s", ftime, tmp);
-	snprintf(log_file, sizeof(log_file), "%s/%s", kpfs_conf_get_log_path(), KPFS_LOG_FILE_NAME);
+	snprintf(log_file, sizeof(log_file), "%s/%s", kpfs_conf_get_writable_tmp_path(), KPFS_LOG_FILE_NAME);
 	fd = open(log_file, O_APPEND | O_WRONLY | O_CREAT, 0666);
 	if (-1 == fd)
 		return -1;

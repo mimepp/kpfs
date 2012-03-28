@@ -26,4 +26,5 @@
 
 char *kpfs_api_account_info();
 char *kpfs_api_metadata(const char *path);
+char *kpfs_api_download_link_create(const char *path);
 #endif

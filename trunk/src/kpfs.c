@@ -42,6 +42,9 @@
 #include "kpfs_conf.h"
 #include "kpfs_oauth.h"
 #include "kpfs_api.h"
+#include "kpfs_curl.h"
+
+static int kpfs_first_run = 1;
 
 static int kpfs_get_root_path()
 {
@@ -276,6 +279,12 @@ static int kpfs_getattr(const char *path, struct stat *stbuf)
 	if (!path || !stbuf)
 		return -1;
 
+	if (1 == kpfs_first_run) {
+		kpfs_get_root_path();
+		kpfs_parse_dir((kpfs_node *) kpfs_node_root_get(), "/");
+		kpfs_first_run = 0;
+	}
+
 	memset(stbuf, 0, sizeof(*stbuf));
 
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
@@ -336,9 +345,23 @@ static int kpfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 
 static int kpfs_read(const char *path, char *rbuf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
+	char *url = NULL;
+	kpfs_node *node = NULL;
+	int ret = 0;
+
+	if (NULL == path || NULL == rbuf)
+		return -1;
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, rbuf:%s, size: %lu, offset: %lu, file info: %p\n", __FUNCTION__, __LINE__, path, rbuf, size, offset, fi);
-	return 0;
+
+	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	if (NULL == node)
+		return -1;
+
+	url = kpfs_api_download_link_create(path);
+	ret = kpfs_curl_range_get(url, rbuf, offset, offset + size - 1);
+	KPFS_SAFE_FREE(url);
+	return ret;
 }
 
 static int kpfs_write(const char *path, const char *wbuf, size_t size, off_t offset, struct fuse_file_info *fi)
@@ -411,9 +434,24 @@ static int kpfs_utimens(const char *path, const struct timespec ts[2])
 
 static int kpfs_open(const char *path, struct fuse_file_info *fi)
 {
+	int ret = 0;
+	kpfs_node *node = NULL;
+
+	if (NULL == path)
+		return -1;
+
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, file info: %p.\n", __FUNCTION__, __LINE__, path, fi);
-	return 0;
+
+	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	if (NULL == node)
+		return -1;
+	if ((fi->flags & O_ACCMODE) == O_RDONLY) {
+		return 0;
+	} else {
+		ret = -ENOTSUP;
+	}
+	return ret;
 }
 
 static int kpfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
@@ -520,9 +558,10 @@ int main(int argc, char *argv[])
 			KPFS_LOG("Fail to get oauth token for kpfs.\n");
 			return -1;
 		}
+		printf("Success to get oauth token, please run %s again to mount as FUSE filesystem.\n", KPFS_APP_NAME);
+		return 0;
 	}
-	kpfs_get_root_path();
-	kpfs_parse_dir((kpfs_node *) kpfs_node_root_get(), "/");
+	curl_global_init(CURL_GLOBAL_DEFAULT);
 
 	fuse_ret = fuse_main(fuse_argc, fuse_argv, &kpfs_oper, NULL);
 
