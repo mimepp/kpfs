@@ -108,11 +108,5 @@ int main(int argc, char *argv[])
 	printf("len %d. buf: %s\n", len, buf);
 	KPFS_SAFE_FREE(buf);
 
-	url = kpfs_api_download_link_create(argv[3]);
-	printf("download url: %s\n", url);
-	buf = calloc(4096, 1);
-	len = kpfs_curl_range_get(url, buf, atol(argv[4]), atol(argv[5]));
-	printf("len %d. buf: %s\n", len, buf);
-	KPFS_SAFE_FREE(buf);
 	return ret;
 }
