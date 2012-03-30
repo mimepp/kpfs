@@ -1,5 +1,15 @@
+2012-03-30 Tao Yu <yut616@gmail.com>
+	* get feedback from author of liboauth, he is debugging the fuse issue.
+	* fix "could not get chinese dir metadata", now it could show chinese dir.
+	* we need to use liboauth-0.9.5, otherwise, the base_url will be modified by liboauth.
+	* user needs to compile liboauth-0.9.5 by themselves on ubuntu 11.10
+
+2012-03-29 Tao Yu <yut616@gmail.com>
+	* find we could not call oauth function in main function, otherwise, getattr function will not work.
+	* report liboauth issue (nss fuse) to its author.
+
 2012-03-25 Tao Yu <yut616@gmail.com> 
- 	* create kpfs.conf, it is json format, we will get consumer key and secret from it firstly.
+	* create kpfs.conf, it is json format, we will get consumer key and secret from it firstly.
 	* we will put mount path in kpfs.conf, and pass it to fuse_main.
 
 2012-03-24 Tao Yu <yut616@gmail.com>

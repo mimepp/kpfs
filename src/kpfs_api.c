@@ -73,8 +73,14 @@ char *kpfs_api_account_info()
 char *kpfs_api_metadata(const char *path)
 {
 	char fullpath[1024] = { 0 };
+	char *path_escape = NULL;
 
-	snprintf(fullpath, sizeof(fullpath), "%s%s", KPFS_API_METADATA "/" KPFS_API_ROOT, path);
+	path_escape = oauth_url_escape(path);
+	if(NULL == path_escape)
+		return NULL;
+
+	snprintf(fullpath, sizeof(fullpath), "%s%s", KPFS_API_METADATA "/" KPFS_API_ROOT, path_escape);
+	KPFS_SAFE_FREE(path_escape);
 	KPFS_FILE_LOG("fullpath: %s\n", fullpath);
 	return kpfs_api_common_request(fullpath);
 }
