@@ -33,6 +33,18 @@
 
 #include "kpfs.h"
 #include "kpfs_conf.h"
+#include "kpfs_util.h"
+
+typedef struct kpfs_account_info_t kpfs_account_info;
+struct kpfs_account_info_t {
+	off_t max_file_size;
+	char user_name[512];
+	char user_id[64];
+	off_t quota_total;
+	off_t quota_used;
+};
+
+kpfs_account_info g_kpfs_account_info;
 
 int kpfs_file_log(const char *fmt, ...)
 {
@@ -64,4 +76,40 @@ int kpfs_file_log(const char *fmt, ...)
 		printf("fail to write: %s.\n", log_file);
 	close(fd);
 	return 0;
+}
+
+kpfs_ret kpfs_util_account_info_store(char *user_name, char *user_id, off_t quota_total, off_t quota_used, off_t max_file_size)
+{
+	memset(&g_kpfs_account_info, 0, sizeof(g_kpfs_account_info));
+
+	if (NULL == user_name || NULL == user_id)
+		return KPFS_RET_FAIL;
+
+	snprintf(g_kpfs_account_info.user_name, sizeof(g_kpfs_account_info.user_name), "%s", user_name);
+	snprintf(g_kpfs_account_info.user_id, sizeof(g_kpfs_account_info.user_id), "%s", user_id);
+	g_kpfs_account_info.quota_total = quota_total;
+	g_kpfs_account_info.quota_used = quota_used;
+	g_kpfs_account_info.max_file_size = max_file_size;
+
+	return KPFS_RET_OK;
+}
+
+off_t kpfs_util_account_quota_total_get()
+{
+	return g_kpfs_account_info.quota_total;
+}
+
+off_t kpfs_util_account_quota_used_get()
+{
+	return g_kpfs_account_info.quota_used;
+}
+
+void kpfs_util_account_info_dump()
+{
+	KPFS_FILE_LOG("kpfs account info:\n");
+	KPFS_FILE_LOG("\tuser_name: %s\n", g_kpfs_account_info.user_name);
+	KPFS_FILE_LOG("\tuser_id: %s\n", g_kpfs_account_info.user_id);
+	KPFS_FILE_LOG("\tquota_total: %lu\n", g_kpfs_account_info.quota_total);
+	KPFS_FILE_LOG("\tquota_used: %lu\n", g_kpfs_account_info.quota_used);
+	KPFS_FILE_LOG("\tmax_file_size: %lu\n", g_kpfs_account_info.max_file_size);
 }

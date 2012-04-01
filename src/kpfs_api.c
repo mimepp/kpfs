@@ -76,7 +76,7 @@ char *kpfs_api_metadata(const char *path)
 	char *path_escape = NULL;
 
 	path_escape = oauth_url_escape(path);
-	if(NULL == path_escape)
+	if (NULL == path_escape)
 		return NULL;
 
 	snprintf(fullpath, sizeof(fullpath), "%s%s", KPFS_API_METADATA "/" KPFS_API_ROOT, path_escape);

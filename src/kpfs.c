@@ -43,6 +43,7 @@
 #include "kpfs_oauth.h"
 #include "kpfs_api.h"
 #include "kpfs_curl.h"
+#include "kpfs_util.h"
 
 static int kpfs_first_run = 1;
 
@@ -50,13 +51,21 @@ static int kpfs_get_root_path()
 {
 	char *response = NULL;
 	json_object *jobj = NULL;
-	off_t size = 0;
+	off_t quota_used = 0;
+	off_t quota_total = 0;
+	off_t max_file_size = 0;
 	int len = 512;
 	char *user_name = NULL;
 	char *user_id = NULL;
+	char *p = NULL;
 
 	response = (char *)kpfs_api_account_info();
 	KPFS_FILE_LOG("access [/] %s:\n", response);
+
+	p = strstr(response, KPFS_ID_QUOTA_TOTAL);
+	if (p) {
+		sscanf(p, KPFS_ID_QUOTA_TOTAL"\": %llu,", &quota_total);
+	}
 
 	jobj = json_tokener_parse(response);
 	if (NULL == jobj || is_error(jobj)) {
@@ -66,7 +75,11 @@ static int kpfs_get_root_path()
 	}
 	json_object_object_foreach(jobj, key, val) {
 		if (!strcmp(key, KPFS_ID_QUOTA_USED)) {
-			size = (off_t) json_object_get_double(val);
+			quota_used = (off_t) json_object_get_double(val);;
+		} else if (!strcmp(key, KPFS_ID_MAX_FILE_SIZE)) {
+			if (json_type_int == json_object_get_type(val)) {
+				max_file_size = (off_t) json_object_get_int(val);
+			}
 		} else if (!strcmp(key, KPFS_ID_USER_ID)) {
 			if (json_type_int == json_object_get_type(val)) {
 				user_id = calloc(len, 1);
@@ -82,7 +95,9 @@ static int kpfs_get_root_path()
 	json_object_put(jobj);
 	KPFS_SAFE_FREE(response);
 
-	if (NULL == kpfs_node_root_create(user_id, user_name, size))
+	kpfs_util_account_info_store(user_name, user_id, quota_total, quota_used, max_file_size);
+
+	if (NULL == kpfs_node_root_create(user_id, user_name, quota_used))
 		return -1;
 
 	return 0;
@@ -373,8 +388,20 @@ static int kpfs_write(const char *path, const char *wbuf, size_t size, off_t off
 
 static int kpfs_statfs(const char *path, struct statvfs *buf)
 {
+	off_t quota_total = kpfs_util_account_quota_total_get();
+	off_t quota_used = kpfs_util_account_quota_used_get();
+
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, statvfs: %p.\n", __FUNCTION__, __LINE__, path, buf);
+
+	kpfs_util_account_info_dump();
+
+	buf->f_bsize = 1;
+	buf->f_frsize = 1;
+	buf->f_blocks = quota_total;
+	buf->f_bfree = quota_total - quota_used;
+	buf->f_bavail = quota_total - quota_used;
+
 	return 0;
 }
 
