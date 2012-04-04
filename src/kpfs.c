@@ -162,8 +162,46 @@ static int kpfs_statfs(const char *path, struct statvfs *buf)
 
 static int kpfs_mkdir(const char *path, mode_t mode)
 {
+	kpfs_node *node = NULL;
+	kpfs_node *parent_node = NULL;
+	char parent_path[KPFS_MAX_PATH] = { 0 };
+	char *p = NULL;
+	char *tmp = NULL;
+
+	if (NULL == path)
+		return -1;
+
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, mode: %d.\n", __FUNCTION__, __LINE__, path, mode);
+
+	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	if (node) {
+		KPFS_FILE_LOG("[%s:%d] kpfs_mkdir, %s is existed.\n", __FUNCTION__, __LINE__, path);
+		return -EEXIST;
+	}
+	if (KPFS_RET_FAIL == kpfs_api_create_folder(path))
+		return -1;
+
+	p = strrchr(path, '/');
+	if (p == path)
+		parent_node = kpfs_node_root_get();
+	else {
+		tmp = (char *)path;
+		do {
+			memset(parent_path, 0, sizeof(parent_path));
+			strncpy(parent_path, tmp, p - tmp);
+			parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);;
+			p = strrchr(parent_path, '/');
+			tmp = parent_path;
+			if (p == parent_path) {
+				parent_node = kpfs_node_root_get();
+				break;
+			}
+		} while (NULL == parent_node);
+	}
+	KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
+	kpfs_node_rebuild(parent_node);
+
 	return 0;
 }
 

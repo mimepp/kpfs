@@ -40,9 +40,43 @@
 
 kpfs_node *g_kpfs_node_root = NULL;
 
+void kpfs_node_free_sub_nodes(GHashTable * sub_nodes)
+{
+	GHashTableIter iter;
+	char *key = NULL;
+	kpfs_node *value = NULL;
+
+	if (NULL == sub_nodes)
+		return;
+
+	g_hash_table_iter_init(&iter, sub_nodes);
+	while (g_hash_table_iter_next(&iter, (gpointer *) & key, (gpointer *) & value)) {
+		if (value)
+			kpfs_node_free(value);
+	}
+}
+
 void kpfs_node_free(gpointer p)
 {
 	kpfs_node *node = (kpfs_node *) p;
+
+	if (NULL == p)
+		return;
+
+	kpfs_node_free_sub_nodes(node->sub_nodes);
+
+	KPFS_SAFE_FREE(node->fullpath);
+	KPFS_SAFE_FREE(node->id);
+	KPFS_SAFE_FREE(node->name);
+	KPFS_SAFE_FREE(node->revision);
+	pthread_mutex_destroy(&(node->mutex));
+	KPFS_SAFE_FREE(node);
+}
+
+void kpfs_node_hash_table_free(gpointer p)
+{
+	kpfs_node *node = (kpfs_node *) p;
+
 	KPFS_SAFE_FREE(node->id);
 	KPFS_SAFE_FREE(node->name);
 	KPFS_SAFE_FREE(node->revision);
@@ -76,7 +110,7 @@ kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size)
 	root->st.st_nlink = 2;
 	root->st.st_size = size;
 	pthread_mutex_init(&(root->mutex), NULL);
-	root->sub_nodes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, kpfs_node_free);
+	root->sub_nodes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, kpfs_node_hash_table_free);
 	g_kpfs_node_root = root;
 
 	return g_kpfs_node_root;
@@ -119,7 +153,7 @@ void kpfs_node_dump(kpfs_node * node)
 		return;
 	}
 
-	KPFS_FILE_LOG("node date:\n");
+	KPFS_FILE_LOG("node data:\n");
 	KPFS_FILE_LOG("\tfullpath: %s\n", node->fullpath);
 	KPFS_FILE_LOG("\tid: %s\n", node->id);
 	KPFS_FILE_LOG("\tname: %s\n", node->name);
@@ -369,4 +403,14 @@ error_out:
 
 	KPFS_SAFE_FREE(response);
 	return ret;
+}
+
+kpfs_ret kpfs_node_rebuild(kpfs_node * node)
+{
+	if (NULL == node || NULL == node->sub_nodes)
+		return KPFS_RET_FAIL;
+
+	kpfs_node_free_sub_nodes(node->sub_nodes);
+
+	return kpfs_node_parse_dir(node, node->fullpath);
 }

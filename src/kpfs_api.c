@@ -65,6 +65,61 @@ error_out:
 	return ret;
 }
 
+static char *kpfs_api_common_request_with_path(char *url, char *root, char *path)
+{
+	char *t_key = kpfs_oauth_token_get();
+	char *t_secret = kpfs_oauth_token_secret_get();
+	char *req_url = NULL;
+	char *reply = NULL;
+	char *ret = NULL;
+	char *path_escape = NULL;
+	int malloc_more_room = 100;
+	char *url_with_path = NULL;
+	int len = 0;
+
+	if (NULL == url || NULL == root || NULL == path)
+		return NULL;
+
+	KPFS_FILE_LOG("request url: %s ...\n", url);
+
+	path_escape = oauth_url_escape(path);
+	if (NULL == path_escape)
+		return NULL;
+
+	len = strlen(url) + strlen(root) + strlen(path_escape) + malloc_more_room;
+	url_with_path = calloc(len, 1);
+	if (NULL == url_with_path) {
+		KPFS_SAFE_FREE(path_escape);
+		return NULL;
+	}
+
+	snprintf(url_with_path, len, "%s?root=%s&path=%s", url, root, path_escape);
+	KPFS_SAFE_FREE(path_escape);
+
+	req_url =
+	    oauth_sign_url2(url_with_path, NULL, OA_HMAC, NULL, (const char *)kpfs_conf_get_consumer_key(), (const char *)kpfs_conf_get_consumer_secret(),
+			    t_key, t_secret);
+	if (!req_url) {
+		goto error_out;
+	}
+
+	KPFS_FILE_LOG("real url: %s.\n", req_url);
+
+	reply = oauth_http_get(req_url, NULL);
+
+	if (!reply) {
+		goto error_out;
+	}
+
+	KPFS_FILE_LOG("response: %s\n", reply);
+	ret = reply;
+
+error_out:
+	KPFS_SAFE_FREE(req_url);
+
+	return ret;
+}
+
 char *kpfs_api_account_info()
 {
 	return kpfs_api_common_request(KPFS_API_ACCOUNT_INFO);
@@ -118,4 +173,12 @@ char *kpfs_api_download_link_create(const char *path)
 	ret = req_url;
 
 	return ret;
+}
+
+kpfs_ret kpfs_api_create_folder(const char *path)
+{
+	char *response = NULL;
+	response = kpfs_api_common_request_with_path(KPFS_API_CREATE_FOLDER, KPFS_API_ROOT, (char *)path);
+	KPFS_SAFE_FREE(response);
+	return KPFS_RET_OK;
 }
