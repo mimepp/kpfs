@@ -53,4 +53,6 @@ kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size);
 void kpfs_node_free(gpointer p);
 kpfs_node *kpfs_node_get_by_path(kpfs_node * node, const char *path);
 void kpfs_node_dump(kpfs_node * node);
+int kpfs_node_get_root_path();
+kpfs_ret kpfs_node_parse_dir(kpfs_node * parent_node, const char *path);
 #endif
