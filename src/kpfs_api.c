@@ -30,6 +30,8 @@
 #include "kpfs_oauth.h"
 #include "kpfs_api.h"
 #include "kpfs_conf.h"
+#include "kpfs_util.h"
+#include "kpfs_curl.h"
 
 static char *kpfs_api_common_request(char *url)
 {
@@ -125,6 +127,11 @@ char *kpfs_api_account_info()
 	return kpfs_api_common_request(KPFS_API_ACCOUNT_INFO);
 }
 
+static char *kpfs_api_root_get()
+{
+	return KPFS_API_ROOT;
+}
+
 char *kpfs_api_metadata(const char *path)
 {
 	char fullpath[1024] = { 0 };
@@ -134,7 +141,7 @@ char *kpfs_api_metadata(const char *path)
 	if (NULL == path_escape)
 		return NULL;
 
-	snprintf(fullpath, sizeof(fullpath), "%s%s", KPFS_API_METADATA "/" KPFS_API_ROOT, path_escape);
+	snprintf(fullpath, sizeof(fullpath), "%s%s%s", KPFS_API_METADATA "/", kpfs_api_root_get(), path_escape);
 	KPFS_SAFE_FREE(path_escape);
 	KPFS_FILE_LOG("fullpath: %s\n", fullpath);
 	return kpfs_api_common_request(fullpath);
@@ -150,17 +157,19 @@ char *kpfs_api_download_link_create(const char *path)
 	char *url_with_path = NULL;
 	int len = 0;
 	int malloc_more_room = 100;
+	char *root = NULL;
 
 	if (NULL == path)
 		return ret;
 
 	KPFS_FILE_LOG("request url: %s ...\n", url);
-	len = strlen(url) + strlen(KPFS_API_ROOT) + strlen(path) + malloc_more_room;
+	root = kpfs_api_root_get();
+	len = strlen(url) + strlen(root) + strlen(path) + malloc_more_room;
 	url_with_path = calloc(len, 1);
 	if (NULL == url_with_path)
 		return ret;
 
-	snprintf(url_with_path, len, "%s?root=%s&path=%s", url, KPFS_API_ROOT, path);
+	snprintf(url_with_path, len, "%s?root=%s&path=%s", url, root, path);
 
 	req_url =
 	    oauth_sign_url2(url_with_path, NULL, OA_HMAC, NULL, (const char *)kpfs_conf_get_consumer_key(), (const char *)kpfs_conf_get_consumer_secret(),
@@ -178,7 +187,86 @@ char *kpfs_api_download_link_create(const char *path)
 kpfs_ret kpfs_api_create_folder(const char *path)
 {
 	char *response = NULL;
-	response = kpfs_api_common_request_with_path(KPFS_API_CREATE_FOLDER, KPFS_API_ROOT, (char *)path);
+	response = kpfs_api_common_request_with_path(KPFS_API_CREATE_FOLDER, kpfs_api_root_get(), (char *)path);
 	KPFS_SAFE_FREE(response);
 	return KPFS_RET_OK;
+}
+
+char *kpfs_api_upload_locate()
+{
+	char url[KPFS_MAX_BUF] = { 0 };
+
+	snprintf(url, sizeof(url), "%s", KPFS_API_UPLOAD_LOCATE);
+
+	return kpfs_api_common_request(url);
+}
+
+char *kpfs_api_upload_file(char *path, char *file)
+{
+	char *t_key = kpfs_oauth_token_get();
+	char *t_secret = kpfs_oauth_token_secret_get();
+	char *postarg = NULL;
+	char *req_url = NULL;
+	char *reply = NULL;
+	char *ret = NULL;
+	char *path_escape = NULL;
+	char *file_escape = NULL;
+	int malloc_more_room = 100;
+	char *url_with_path = NULL;
+	int len = 0;
+	char *url = kpfs_util_upload_locate_get();
+	char *root = NULL;
+	char post_url[KPFS_MAX_BUF] = { 0 };
+
+	if (NULL == path || NULL == file)
+		return ret;
+
+	KPFS_FILE_LOG("request url: %s ...\n", url);
+	root = kpfs_api_root_get();
+
+	path_escape = oauth_url_escape(path);
+	if (NULL == path_escape)
+		return ret;
+
+	len = strlen(url) + strlen(KPFS_API_UPLOAD_FILE) + strlen(root) + strlen(path_escape) + malloc_more_room;
+	url_with_path = calloc(len, 1);
+	if (NULL == url_with_path) {
+		KPFS_SAFE_FREE(path_escape);
+		return ret;
+	}
+
+	snprintf(url_with_path, len, "%s%s?root=%s&path=%s&overwrite=true", url, KPFS_API_UPLOAD_FILE, root, path_escape);
+	KPFS_SAFE_FREE(path_escape);
+
+	KPFS_FILE_LOG("url_with_path: %s, ...\n", url_with_path);
+
+	req_url =
+	    oauth_sign_url2(url_with_path, &postarg, OA_HMAC, NULL, (const char *)kpfs_conf_get_consumer_key(), (const char *)kpfs_conf_get_consumer_secret(),
+			    t_key, t_secret);
+	KPFS_SAFE_FREE(url_with_path);
+	if (!req_url) {
+		goto error_out;
+	}
+
+	snprintf(post_url, sizeof(post_url), "%s?%s", req_url, postarg);
+	KPFS_FILE_LOG("post_url: %s.\n", post_url);
+
+	file_escape = oauth_url_escape(file);
+	if (NULL == file_escape)
+		goto error_out;
+
+	reply = calloc(KPFS_MAX_BUF, 1);
+	if (NULL == reply)
+		goto error_out;
+
+	kpfs_curl_upload(post_url, file_escape, reply);
+
+	KPFS_FILE_LOG("upload reply: %s\n", reply);
+	ret = reply;
+
+error_out:
+	KPFS_SAFE_FREE(req_url);
+	KPFS_SAFE_FREE(file_escape);
+
+	return ret;
 }

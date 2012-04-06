@@ -116,6 +116,69 @@ int kpfs_curl_range_get(const char *url, char *buf, curl_off_t start_pos, curl_o
 
 	ret = curl_easy_perform(curl_handle);
 
+	curl_easy_cleanup(curl_handle);
+
+	if (ret != CURLE_OK) {
+		KPFS_FILE_LOG("%s\n", curl_easy_strerror(ret));
+		KPFS_FILE_LOG("[%s, %d] curl told us %d: %s.\n", __FUNCTION__, __LINE__, ret, errbuf);
+		return -1;
+	}
+	return data.count;
+}
+
+int kpfs_curl_upload(const char *url, char *file, char *reply)
+{
+	CURL *curl_handle = NULL;
+	CURLcode ret = CURLE_GOT_NOTHING;
+	struct curl_httppost *formpost = NULL;
+	struct curl_httppost *lastptr = NULL;
+	struct curl_slist *headerlist = NULL;
+	static const char expect_buf[] = "Expect:";
+	char errbuf[CURL_ERROR_SIZE];
+	char cookie_path[KPFS_MAX_PATH] = { 0 };
+	kpfs_curl_data data;
+
+	if (NULL == url || NULL == reply || NULL == file)
+		return -1;
+
+	data.buf = reply;
+	data.count = 0;
+
+	curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, file, CURLFORM_END);
+
+	curl_handle = curl_easy_init();
+
+	curl_easy_reset(curl_handle);
+
+	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, KPFS_APP_NAME "/" KPFS_VERSION);
+
+	curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+
+	snprintf(cookie_path, sizeof(cookie_path), "%s/%s", (char *)kpfs_conf_get_writable_tmp_path(), KPFS_COOKIE_FILE_NAME);
+	curl_easy_setopt(curl_handle, CURLOPT_COOKIEFILE, cookie_path);
+
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&data);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_func);
+
+	curl_easy_setopt(curl_handle, CURLOPT_LOW_SPEED_LIMIT, KPFS_CURL_LOW_SPEED_LIMIT);	// Low limit : ? bytes per seconds
+	curl_easy_setopt(curl_handle, CURLOPT_LOW_SPEED_TIME, KPFS_CURL_LOW_SPEED_TIMEOUT);	// Below low limit for ? seconds
+
+	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, errbuf);
+
+	curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
+
+	headerlist = curl_slist_append(headerlist, expect_buf);
+	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
+	curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
+
+	ret = curl_easy_perform(curl_handle);
+
+	curl_easy_cleanup(curl_handle);
+	curl_formfree(formpost);
+	curl_slist_free_all(headerlist);
+
 	if (ret != CURLE_OK) {
 		KPFS_FILE_LOG("%s\n", curl_easy_strerror(ret));
 		KPFS_FILE_LOG("[%s, %d] curl told us %d: %s.\n", __FUNCTION__, __LINE__, ret, errbuf);

@@ -31,9 +31,13 @@
 #include <time.h>
 #include <fcntl.h>
 
+#define __STRICT_ANSI__
+#include <json/json.h>
+
 #include "kpfs.h"
 #include "kpfs_conf.h"
 #include "kpfs_util.h"
+#include "kpfs_api.h"
 
 typedef struct kpfs_account_info_t kpfs_account_info;
 struct kpfs_account_info_t {
@@ -45,6 +49,8 @@ struct kpfs_account_info_t {
 };
 
 kpfs_account_info g_kpfs_account_info;
+
+char g_kpfs_upload_locate_url[KPFS_MAX_PATH] = { 0 };
 
 int kpfs_file_log(const char *fmt, ...)
 {
@@ -112,4 +118,35 @@ void kpfs_util_account_info_dump()
 	KPFS_FILE_LOG("\tquota_total: %lu\n", g_kpfs_account_info.quota_total);
 	KPFS_FILE_LOG("\tquota_used: %lu\n", g_kpfs_account_info.quota_used);
 	KPFS_FILE_LOG("\tmax_file_size: %lu\n", g_kpfs_account_info.max_file_size);
+}
+
+char *kpfs_util_upload_locate_get()
+{
+	char *response = NULL;
+	json_object *jobj = NULL;
+
+	if (g_kpfs_upload_locate_url[0] != '\0')
+		return g_kpfs_upload_locate_url;
+
+	response = kpfs_api_upload_locate();
+
+	jobj = json_tokener_parse(response);
+	if (NULL == jobj || is_error(jobj)) {
+		KPFS_FILE_LOG("%s:%d, json_tokener_parse return error.\n", __FUNCTION__, __LINE__);
+		KPFS_SAFE_FREE(response);
+		return NULL;
+	}
+	json_object_object_foreach(jobj, key, val) {
+		if (!strcmp(key, KPFS_ID_URL)) {
+			if (json_type_string == json_object_get_type(val)) {
+				snprintf(g_kpfs_upload_locate_url, sizeof(g_kpfs_upload_locate_url), "%s", json_object_get_string(val));
+				KPFS_FILE_LOG("%s:%d, url: %s.\n", __FUNCTION__, __LINE__, g_kpfs_upload_locate_url);
+			}
+		}
+	}
+	json_object_put(jobj);
+
+	KPFS_SAFE_FREE(response);
+
+	return g_kpfs_upload_locate_url;
 }

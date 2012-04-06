@@ -78,6 +78,7 @@
 #define KPFS_ID_ROOT			"root"
 #define KPFS_ID_HASH			"hash"
 #define KPFS_ID_MSG			"msg"
+#define KPFS_ID_URL			"url"
 
 #define KPFS_MSG_STR_REUSED_NONCE	"reused nonce"
 
