@@ -28,4 +28,6 @@ char *kpfs_api_account_info();
 char *kpfs_api_metadata(const char *path);
 char *kpfs_api_download_link_create(const char *path);
 kpfs_ret kpfs_api_create_folder(const char *path);
+char *kpfs_api_upload_locate();
+char *kpfs_api_upload_file(char *path, char *file);
 #endif
