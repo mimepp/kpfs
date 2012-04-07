@@ -144,9 +144,10 @@ int kpfs_curl_upload(const char *url, char *file, char *reply)
 	data.buf = reply;
 	data.count = 0;
 
-	curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, file, CURLFORM_END);
-
 	curl_handle = curl_easy_init();
+
+	if (NULL == curl_handle)
+		return -1;
 
 	curl_easy_reset(curl_handle);
 
@@ -167,11 +168,11 @@ int kpfs_curl_upload(const char *url, char *file, char *reply)
 
 	curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
 
+	curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, "file", CURLFORM_FILE, file, CURLFORM_END);
 	headerlist = curl_slist_append(headerlist, expect_buf);
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
-	curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
 
 	ret = curl_easy_perform(curl_handle);
 
