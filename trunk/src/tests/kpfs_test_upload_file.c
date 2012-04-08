@@ -37,13 +37,12 @@ static void kpfs_test_usage(char *argv0)
 	if (NULL == argv0)
 		return;
 	fprintf(stderr, "%s version: %s\n", argv0, KPFS_VERSION);
-	fprintf(stderr, "usage:  %s -c <path of kpfs.conf> path filename src_fullpath\n", argv0);
+	fprintf(stderr, "usage:  %s -c <path of kpfs.conf> dest_fullpath src_fullpath\n", argv0);
 	fprintf(stderr, "\t -c <path of kpfs.conf> \tset config file for kpfs, it is json format.\n");
 	fprintf(stderr, "\t -h \t --help \t\tthis usage.\n");
-	fprintf(stderr, "\t path \t\t\t\tthe path you want to upload file to.\n");
-	fprintf(stderr, "\t filename \t\t\tthe filename you want the uploaded file to be.\n");
+	fprintf(stderr, "\t dest_fullpath \t\t\tthe full path you want to upload file to.\n");
 	fprintf(stderr, "\t src_fullpath \t\t\tthe full path of the file you want to upload.\n");
-	fprintf(stderr, "\t e.g.: %s -c /etc/kpfs.conf /demo abc /etc/kpfs.conf.\n", argv0);
+	fprintf(stderr, "\t e.g.: %s -c /etc/kpfs.conf /demo/abc /etc/kpfs.conf.\n", argv0);
 	fprintf(stderr, "\t you should set mount point in kpfs.conf\n");
 }
 
@@ -53,7 +52,7 @@ int main(int argc, char *argv[])
 	struct stat st;
 	char *response = NULL;
 
-	if (argc < 6) {
+	if (argc < 5) {
 		kpfs_test_usage(argv[0]);
 		return -1;
 	}
@@ -98,7 +97,7 @@ int main(int argc, char *argv[])
 
 	curl_global_init(CURL_GLOBAL_ALL);
 
-	response = (char *)kpfs_api_upload_file(argv[3], argv[4], argv[5]);
+	response = (char *)kpfs_api_upload_file(argv[3], argv[4]);
 	printf("%s\n", response);
 	KPFS_SAFE_FREE(response);
 	return ret;

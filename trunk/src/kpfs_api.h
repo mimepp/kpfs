@@ -29,5 +29,5 @@ char *kpfs_api_metadata(const char *path);
 char *kpfs_api_download_link_create(const char *path);
 kpfs_ret kpfs_api_create_folder(const char *path);
 char *kpfs_api_upload_locate();
-char *kpfs_api_upload_file(char *dest_path, char *dest_filename, char *src_fullpath);
+char *kpfs_api_upload_file(char *dest_fullpath, char *src_fullpath);
 #endif
