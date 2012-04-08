@@ -201,7 +201,7 @@ char *kpfs_api_upload_locate()
 	return kpfs_api_common_request(url);
 }
 
-char *kpfs_api_upload_file(char *dest_path, char *dest_filename, char *src_fullpath)
+char *kpfs_api_upload_file(char *dest_fullpath, char *src_fullpath)
 {
 	char *t_key = kpfs_oauth_token_get();
 	char *t_secret = kpfs_oauth_token_secret_get();
@@ -209,40 +209,30 @@ char *kpfs_api_upload_file(char *dest_path, char *dest_filename, char *src_fullp
 	char *req_url = NULL;
 	char *reply = NULL;
 	char *ret = NULL;
-	char *dest_path_escape = NULL;
-	char *dest_filename_escape = NULL;
+	char *dest_fullpath_escape = NULL;
 	int malloc_more_room = 100;
 	char *url_with_path = NULL;
 	int len = 0;
 	char *url = kpfs_util_upload_locate_get();
 	char *root = NULL;
 	char post_url[KPFS_MAX_BUF] = { 0 };
-	char tmp[KPFS_MAX_PATH] = { 0 };
 
-	if (NULL == dest_path || NULL == dest_filename || NULL == src_fullpath)
+	if (NULL == dest_fullpath || NULL == src_fullpath)
 		return ret;
 
 	KPFS_FILE_LOG("request url: %s ...\n", url);
 	root = kpfs_api_root_get();
 
-	if (dest_path[strlen(dest_path) - 1] != '/')
-		snprintf(tmp, sizeof(tmp), "%s/", dest_path);
-	else
-		snprintf(tmp, sizeof(tmp), "%s", dest_path);
-	dest_path_escape = oauth_url_escape(tmp);
-	if (NULL == dest_path_escape)
+	dest_fullpath_escape = oauth_url_escape(dest_fullpath);
+	if (NULL == dest_fullpath_escape)
 		goto error_out;
 
-	dest_filename_escape = oauth_url_escape(dest_filename);
-	if (NULL == dest_filename_escape)
-		goto error_out;
-
-	len = strlen(url) + strlen(KPFS_API_UPLOAD_FILE) + strlen(root) + strlen(dest_path_escape) + strlen(dest_filename_escape) + malloc_more_room;
+	len = strlen(url) + strlen(KPFS_API_UPLOAD_FILE) + strlen(root) + strlen(dest_fullpath_escape) + malloc_more_room;
 	url_with_path = calloc(len, 1);
 	if (NULL == url_with_path)
 		goto error_out;
 
-	snprintf(url_with_path, len, "%s%s?root=%s&path=%s%s&overwrite=true", url, KPFS_API_UPLOAD_FILE, root, dest_path_escape, dest_filename_escape);
+	snprintf(url_with_path, len, "%s%s?root=%s&path=%s&overwrite=true", url, KPFS_API_UPLOAD_FILE, root, dest_fullpath_escape);
 
 	KPFS_FILE_LOG("url_with_path: %s, ...\n", url_with_path);
 
@@ -266,8 +256,7 @@ char *kpfs_api_upload_file(char *dest_path, char *dest_filename, char *src_fullp
 	ret = reply;
 
 error_out:
-	KPFS_SAFE_FREE(dest_path_escape);
-	KPFS_SAFE_FREE(dest_filename_escape);
+	KPFS_SAFE_FREE(dest_fullpath_escape);
 	KPFS_SAFE_FREE(req_url);
 
 	return ret;
