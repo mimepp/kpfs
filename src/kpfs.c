@@ -22,12 +22,14 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <curl/curl.h>
 #include <errno.h>
 #include <fuse.h>
 #include <fuse_opt.h>
+#include <oauth.h>
 
 #define __STRICT_ANSI__
 #include <json/json.h>
@@ -41,6 +43,44 @@
 #include "kpfs_util.h"
 
 static int kpfs_first_run = 1;
+
+static char *kpfs_get_tmpfile(struct fuse_file_info *fi)
+{
+	return (char *)(uintptr_t) fi->fh;
+}
+
+static void kpfs_sha1_replace_slash(char *buf, int len)
+{
+	int i = 0;
+	if (NULL == buf)
+		return;
+	for (i = 0; i < len; i++) {
+		if (buf[i] == '/')
+			buf[i] = 'a';
+	}
+}
+
+static char *kpfs_gen_tmp_fullpath(const char *fullpath)
+{
+	char *t_key = kpfs_oauth_token_get();
+	char *tmp_fullpath = NULL;
+	char *sha1 = NULL;
+
+	if (NULL == fullpath)
+		return NULL;
+
+	tmp_fullpath = calloc(KPFS_MAX_PATH, 1);
+	if (NULL == tmp_fullpath)
+		return NULL;
+
+	sha1 = oauth_sign_hmac_sha1(fullpath, t_key);
+
+	kpfs_sha1_replace_slash(sha1, strlen(sha1));
+
+	snprintf(tmp_fullpath, KPFS_MAX_PATH, "%s/%s", kpfs_conf_get_writable_tmp_path(), (char *)sha1);
+	KPFS_SAFE_FREE(sha1);
+	return tmp_fullpath;
+}
 
 static int kpfs_getattr(const char *path, struct stat *stbuf)
 {
@@ -136,9 +176,24 @@ static int kpfs_read(const char *path, char *rbuf, size_t size, off_t offset, st
 
 static int kpfs_write(const char *path, const char *wbuf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
+	int fd = 0;
+	int ret = 0;
+	char *tmpfile = NULL;
+
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, wbuf:%s, size: %lu, offset: %lu, file info: %p\n", __FUNCTION__, __LINE__, path, wbuf, size, offset, fi);
-	return 0;
+
+	tmpfile = kpfs_get_tmpfile(fi);
+	fd = open(tmpfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	if (fd == -1)
+		return -errno;
+
+	ret = pwrite(fd, wbuf, size, offset);
+	if (ret == -1)
+		ret = -errno;
+	close(fd);
+
+	return ret;
 }
 
 static int kpfs_statfs(const char *path, struct statvfs *buf)
@@ -214,8 +269,20 @@ static int kpfs_rmdir(const char *path)
 
 static int kpfs_release(const char *path, struct fuse_file_info *fi)
 {
+	char *response = NULL;
+	char *tmpfile = NULL;
+
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, file info: %p.\n", __FUNCTION__, __LINE__, path, fi);
+
+	if (fi->flags & (O_RDWR | O_WRONLY)) {
+		tmpfile = kpfs_get_tmpfile(fi);
+		response = kpfs_api_upload_file((char *)path, tmpfile);
+		unlink(tmpfile);
+		KPFS_SAFE_FREE(tmpfile);
+		KPFS_FILE_LOG("response: %s\n", response);
+		KPFS_SAFE_FREE(response);
+	}
 	return 0;
 }
 
@@ -268,6 +335,9 @@ static int kpfs_open(const char *path, struct fuse_file_info *fi)
 		return -1;
 	if ((fi->flags & O_ACCMODE) == O_RDONLY) {
 		return 0;
+	} else if (fi->flags & (O_RDWR | O_WRONLY)) {
+		char *tmpfile = kpfs_gen_tmp_fullpath(path);
+		fi->fh = (unsigned long)tmpfile;
 	} else {
 		ret = -ENOTSUP;
 	}
@@ -276,8 +346,24 @@ static int kpfs_open(const char *path, struct fuse_file_info *fi)
 
 static int kpfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 {
+	int fd = 0;
+	char *tmpfile = NULL;
+	int ret = 0;
+
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, mode: %d, file info: %p.\n", __FUNCTION__, __LINE__, path, mode, fi);
+
+	tmpfile = kpfs_gen_tmp_fullpath(path);
+
+	fi->fh = (unsigned long)tmpfile;
+
+	fd = open(tmpfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	if (fd == -1)
+		return -errno;
+	ret = write(fd, "\0", 1);
+	KPFS_FILE_LOG("[%s:%d] ret: %d\n", __FUNCTION__, __LINE__, ret);
+	close(fd);
+
 	return 0;
 }
 

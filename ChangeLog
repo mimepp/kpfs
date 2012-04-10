@@ -1,3 +1,17 @@
+2012-04-10 Tao Yu <yut616@gmail.com>
+	* add write function, I will use a tmp file to store data, and upload it in "release" function of fuse.
+	* kuaipan API does not support 0 size file upload, so we need to write a '\0' to empty file, e.g. touch command.
+
+2012-04-08 Tao Yu <yut616@gmail.com>
+	* we will use oauth to create url link, and use curl POST with curl_formadd CURLFORM_COPYNAME, this is MUST in kuaipan API
+	* refine param of upload file function, we will use dest_fullpath and src_fullpath
+
+2012-04-04 Tao Yu <yut616@gmail.com>
+	* add mkdir function, and rebuild the parent node, but node has bug, I need to debug it later.
+
+2012-04-01 Tao Yu <yut616@gmail.com>
+	* add statfs function by account info.
+
 2012-03-30 Tao Yu <yut616@gmail.com>
 	* get feedback from author of liboauth, he is debugging the fuse issue.
 	* fix "could not get chinese dir metadata", now it could show chinese dir.
