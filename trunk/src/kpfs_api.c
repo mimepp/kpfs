@@ -118,6 +118,67 @@ static char *kpfs_api_common_request_with_path(char *url, char *root, char *path
 
 error_out:
 	KPFS_SAFE_FREE(req_url);
+	KPFS_SAFE_FREE(url_with_path);
+
+	return ret;
+}
+
+static char *kpfs_api_common_request_from_to(char *url, char *root, char *from_path, char *to_path)
+{
+	char *t_key = kpfs_oauth_token_get();
+	char *t_secret = kpfs_oauth_token_secret_get();
+	char *req_url = NULL;
+	char *reply = NULL;
+	char *ret = NULL;
+	char *from_path_escape = NULL;
+	char *to_path_escape = NULL;
+	int malloc_more_room = 100;
+	char *url_from_to = NULL;
+	int len = 0;
+
+	if (NULL == url || NULL == root || NULL == from_path || NULL == to_path)
+		return NULL;
+
+	KPFS_FILE_LOG("request url: %s ...\n", url);
+
+	from_path_escape = oauth_url_escape(from_path);
+	if (NULL == from_path_escape)
+		goto error_out;
+
+	to_path_escape = oauth_url_escape(to_path);
+	if (NULL == to_path_escape)
+		goto error_out;
+
+	len = strlen(url) + strlen(root) + strlen(from_path_escape) + strlen(to_path_escape) + malloc_more_room;
+	url_from_to = calloc(len, 1);
+	if (NULL == url_from_to)
+		goto error_out;
+
+	snprintf(url_from_to, len, "%s?root=%s&from_path=%s&to_path=%s", url, root, from_path_escape, to_path_escape);
+
+	req_url =
+	    oauth_sign_url2(url_from_to, NULL, OA_HMAC, NULL, (const char *)kpfs_conf_get_consumer_key(), (const char *)kpfs_conf_get_consumer_secret(),
+			    t_key, t_secret);
+	if (!req_url) {
+		goto error_out;
+	}
+
+	KPFS_FILE_LOG("real url: %s.\n", req_url);
+
+	reply = oauth_http_get(req_url, NULL);
+
+	if (!reply) {
+		goto error_out;
+	}
+
+	KPFS_FILE_LOG("response: %s\n", reply);
+	ret = reply;
+
+error_out:
+	KPFS_SAFE_FREE(req_url);
+	KPFS_SAFE_FREE(url_from_to);
+	KPFS_SAFE_FREE(to_path_escape);
+	KPFS_SAFE_FREE(from_path_escape);
 
 	return ret;
 }
@@ -266,6 +327,14 @@ kpfs_ret kpfs_api_delete(const char *path)
 {
 	char *response = NULL;
 	response = kpfs_api_common_request_with_path(KPFS_API_DELETE, kpfs_api_root_get(), (char *)path);
+	KPFS_SAFE_FREE(response);
+	return KPFS_RET_OK;
+}
+
+kpfs_ret kpfs_api_move(const char *from_path, const char *to_path)
+{
+	char *response = NULL;
+	response = kpfs_api_common_request_from_to(KPFS_API_MOVE, kpfs_api_root_get(), (char *)from_path, (char *)to_path);
 	KPFS_SAFE_FREE(response);
 	return KPFS_RET_OK;
 }

@@ -1,3 +1,8 @@
+2012-04-14 Tao Yu <yut616@gmail.com>
+	* refine node free function, we will handle free of node by ourselves, we will not use g_free
+	* refine mkdir
+	* add rmdir, unlink, rename function
+
 2012-04-10 Tao Yu <yut616@gmail.com>
 	* add write function, I will use a tmp file to store data, and upload it in "release" function of fuse.
 	* kuaipan API does not support 0 size file upload, so we need to write a '\0' to empty file, e.g. touch command.
