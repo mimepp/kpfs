@@ -242,17 +242,19 @@ static int kpfs_mkdir(const char *path, mode_t mode)
 		parent_node = kpfs_node_root_get();
 	else {
 		tmp = (char *)path;
-		do {
+		while (1) {
 			memset(parent_path, 0, sizeof(parent_path));
 			strncpy(parent_path, tmp, p - tmp);
 			parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);;
+			if (parent_node)
+				break;
 			p = strrchr(parent_path, '/');
 			tmp = parent_path;
 			if (p == parent_path) {
 				parent_node = kpfs_node_root_get();
 				break;
 			}
-		} while (NULL == parent_node);
+		};
 	}
 	KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
 	kpfs_node_rebuild(parent_node);
