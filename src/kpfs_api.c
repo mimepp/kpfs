@@ -261,3 +261,11 @@ error_out:
 
 	return ret;
 }
+
+kpfs_ret kpfs_api_delete(const char *path)
+{
+	char *response = NULL;
+	response = kpfs_api_common_request_with_path(KPFS_API_DELETE, kpfs_api_root_get(), (char *)path);
+	KPFS_SAFE_FREE(response);
+	return KPFS_RET_OK;
+}
