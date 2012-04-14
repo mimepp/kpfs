@@ -32,4 +32,5 @@ off_t kpfs_util_account_quota_total_get();
 off_t kpfs_util_account_quota_used_get();
 void kpfs_util_account_info_dump();
 char *kpfs_util_upload_locate_get();
+char *kpfs_util_get_parent_path(char *path);
 #endif
