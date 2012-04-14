@@ -285,7 +285,7 @@ static int kpfs_release(const char *path, struct fuse_file_info *fi)
 		KPFS_FILE_LOG("response: %s\n", response);
 		KPFS_SAFE_FREE(response);
 
-		parent_path = kpfs_util_get_parent_path((char*)path);
+		parent_path = kpfs_util_get_parent_path((char *)path);
 		parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
 		KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
 		kpfs_node_rebuild(parent_node);

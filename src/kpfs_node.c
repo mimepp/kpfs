@@ -51,8 +51,12 @@ void kpfs_node_free_sub_nodes(GHashTable * sub_nodes)
 
 	g_hash_table_iter_init(&iter, sub_nodes);
 	while (g_hash_table_iter_next(&iter, (gpointer *) & key, (gpointer *) & value)) {
-		if (value)
+		if (value) {
+			kpfs_node_free_sub_nodes(value->sub_nodes);
+			g_hash_table_destroy(value->sub_nodes);
 			kpfs_node_free(value);
+			KPFS_SAFE_FREE(value);
+		}
 	}
 }
 
@@ -63,25 +67,11 @@ void kpfs_node_free(gpointer p)
 	if (NULL == p)
 		return;
 
-	kpfs_node_free_sub_nodes(node->sub_nodes);
-
 	KPFS_SAFE_FREE(node->fullpath);
 	KPFS_SAFE_FREE(node->id);
 	KPFS_SAFE_FREE(node->name);
 	KPFS_SAFE_FREE(node->revision);
 	pthread_mutex_destroy(&(node->mutex));
-	KPFS_SAFE_FREE(node);
-}
-
-void kpfs_node_hash_table_free(gpointer p)
-{
-	kpfs_node *node = (kpfs_node *) p;
-
-	KPFS_SAFE_FREE(node->id);
-	KPFS_SAFE_FREE(node->name);
-	KPFS_SAFE_FREE(node->revision);
-	pthread_mutex_destroy(&(node->mutex));
-	KPFS_SAFE_FREE(node);
 }
 
 kpfs_node *kpfs_node_root_get()
@@ -110,7 +100,7 @@ kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size)
 	root->st.st_nlink = 2;
 	root->st.st_size = size;
 	pthread_mutex_init(&(root->mutex), NULL);
-	root->sub_nodes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, kpfs_node_hash_table_free);
+	root->sub_nodes = g_hash_table_new(g_str_hash, g_str_equal);
 	g_kpfs_node_root = root;
 
 	return g_kpfs_node_root;
@@ -308,7 +298,7 @@ kpfs_ret kpfs_node_parse_dir(kpfs_node * parent_node, const char *path)
 							KPFS_FILE_LOG("%s:%d, pthread_mutex_init fail.\n", __FUNCTION__, __LINE__);
 							goto error_out;
 						}
-						node->sub_nodes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, kpfs_node_free);
+						node->sub_nodes = g_hash_table_new(g_str_hash, g_str_equal);
 						len = strlen(path) + 1;
 						parent_path = calloc(len, 1);
 						snprintf(parent_path, len, "%s", path);
@@ -376,7 +366,7 @@ kpfs_ret kpfs_node_parse_dir(kpfs_node * parent_node, const char *path)
 								node->fullpath = calloc(len, 1);
 								snprintf(node->fullpath, len, "%s/%s", parent_path, node->name);
 							}
-							KPFS_LOG("%s:%d, fullpath: %s.\n", __FUNCTION__, __LINE__, node->fullpath);
+							KPFS_FILE_LOG("%s:%d, fullpath: %s.\n", __FUNCTION__, __LINE__, node->fullpath);
 							if (KPFS_NODE_TYPE_FOLDER == node->type) {
 								kpfs_node_parse_dir(node, node->fullpath);
 								node->st.st_mode = S_IFDIR | 0755;
@@ -411,6 +401,7 @@ kpfs_ret kpfs_node_rebuild(kpfs_node * node)
 		return KPFS_RET_FAIL;
 
 	kpfs_node_free_sub_nodes(node->sub_nodes);
+	g_hash_table_remove_all(node->sub_nodes);
 
 	return kpfs_node_parse_dir(node, node->fullpath);
 }
