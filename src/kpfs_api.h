@@ -31,4 +31,5 @@ kpfs_ret kpfs_api_create_folder(const char *path);
 char *kpfs_api_upload_locate();
 char *kpfs_api_upload_file(char *dest_fullpath, char *src_fullpath);
 kpfs_ret kpfs_api_delete(const char *path);
+kpfs_ret kpfs_api_move(const char *from_path, const char *to_path);
 #endif

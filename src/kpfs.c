@@ -329,8 +329,31 @@ static int kpfs_release(const char *path, struct fuse_file_info *fi)
 
 static int kpfs_rename(const char *from, const char *to)
 {
+	kpfs_node *node = NULL;
+	kpfs_node *parent_node = NULL;
+	char *parent_path = NULL;
+
+	if (NULL == from || NULL == to)
+		return -1;
+
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] from: %s, to: %s.\n", __FUNCTION__, __LINE__, from, to);
+
+	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), from);
+	if (NULL == node) {
+		KPFS_FILE_LOG("[%s:%d] %s is not existed.\n", __FUNCTION__, __LINE__, from);
+		return -EEXIST;
+	}
+	if (KPFS_RET_FAIL == kpfs_api_move(from, to))
+		return -1;
+
+	parent_path = kpfs_util_get_parent_path((char *)from);
+	parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
+	KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
+	KPFS_SAFE_FREE(parent_path);
+
+	kpfs_node_rebuild(parent_node);
+
 	return 0;
 }
 
