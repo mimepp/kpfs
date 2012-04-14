@@ -271,6 +271,8 @@ static int kpfs_release(const char *path, struct fuse_file_info *fi)
 {
 	char *response = NULL;
 	char *tmpfile = NULL;
+	char *parent_path = NULL;
+	kpfs_node *parent_node = NULL;
 
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, file info: %p.\n", __FUNCTION__, __LINE__, path, fi);
@@ -282,6 +284,12 @@ static int kpfs_release(const char *path, struct fuse_file_info *fi)
 		KPFS_SAFE_FREE(tmpfile);
 		KPFS_FILE_LOG("response: %s\n", response);
 		KPFS_SAFE_FREE(response);
+
+		parent_path = kpfs_util_get_parent_path((char*)path);
+		parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
+		KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
+		kpfs_node_rebuild(parent_node);
+		KPFS_SAFE_FREE(parent_path);
 	}
 	return 0;
 }
@@ -360,7 +368,6 @@ static int kpfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 	fd = open(tmpfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
 	if (fd == -1)
 		return -errno;
-	ret = write(fd, "\0", 1);
 	KPFS_FILE_LOG("[%s:%d] ret: %d\n", __FUNCTION__, __LINE__, ret);
 	close(fd);
 

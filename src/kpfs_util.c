@@ -150,3 +150,22 @@ char *kpfs_util_upload_locate_get()
 
 	return g_kpfs_upload_locate_url;
 }
+
+char *kpfs_util_get_parent_path(char *path)
+{
+	char *p = NULL;
+	char *parent_path = NULL;
+
+	if (NULL == path)
+		return NULL;
+
+	p = strrchr(path, '/');
+	if (NULL == p)
+		return NULL;
+	parent_path = calloc(KPFS_MAX_PATH, 1);
+	if (NULL == parent_path)
+		return NULL;
+	strncpy(parent_path, path, p - path);
+
+	return parent_path;
+}
