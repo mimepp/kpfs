@@ -262,11 +262,42 @@ static int kpfs_mkdir(const char *path, mode_t mode)
 	return 0;
 }
 
+static int kpfs_delete(const char *path)
+{
+	kpfs_node *node = NULL;
+	kpfs_node *parent_node = NULL;
+	char *parent_path = NULL;
+
+	if (NULL == path)
+		return -1;
+
+	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
+	KPFS_FILE_LOG("[%s:%d] path: %s.\n", __FUNCTION__, __LINE__, path);
+
+	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	if (NULL == node) {
+		KPFS_FILE_LOG("[%s:%d] %s is not existed.\n", __FUNCTION__, __LINE__, path);
+		return -EEXIST;
+	}
+	if (KPFS_RET_FAIL == kpfs_api_delete(path))
+		return -1;
+
+	parent_path = kpfs_util_get_parent_path((char *)path);
+	parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
+	KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
+	KPFS_SAFE_FREE(parent_path);
+
+	kpfs_node_rebuild(parent_node);
+
+	return 0;
+}
+
 static int kpfs_rmdir(const char *path)
 {
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s.\n", __FUNCTION__, __LINE__, path);
-	return 0;
+
+	return kpfs_delete(path);
 }
 
 static int kpfs_release(const char *path, struct fuse_file_info *fi)
@@ -380,7 +411,8 @@ static int kpfs_unlink(const char *path)
 {
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s.\n", __FUNCTION__, __LINE__, path);
-	return 0;
+
+	return kpfs_delete(path);
 }
 
 static struct fuse_operations kpfs_oper = {
