@@ -1,3 +1,7 @@
+2012-04-15 Tao Yu <yut616@gmail.com>
+	* refine the write related function, we will not upload swap file, e.g. swp.
+	* now write function could work.
+
 2012-04-14 Tao Yu <yut616@gmail.com>
 	* refine node free function, we will handle free of node by ourselves, we will not use g_free
 	* refine mkdir

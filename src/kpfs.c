@@ -82,6 +82,18 @@ static char *kpfs_gen_tmp_fullpath(const char *fullpath)
 	return tmp_fullpath;
 }
 
+static int kpfs_is_swap_file(const char *path)
+{
+	char *p = NULL;
+	if (NULL == path)
+		return 0;
+	p = strrchr(path, '.');
+	if (p && (0 == strcasecmp(p, ".swp"))) {
+		return 1;
+	}
+	return 0;
+}
+
 static int kpfs_getattr(const char *path, struct stat *stbuf)
 {
 	kpfs_node *node = NULL;
@@ -182,6 +194,9 @@ static int kpfs_write(const char *path, const char *wbuf, size_t size, off_t off
 
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, wbuf:%s, size: %lu, offset: %lu, file info: %p\n", __FUNCTION__, __LINE__, path, wbuf, size, offset, fi);
+
+	if (1 == kpfs_is_swap_file(path))
+		return -ENOTSUP;
 
 	tmpfile = kpfs_get_tmpfile(fi);
 	fd = open(tmpfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -310,6 +325,9 @@ static int kpfs_release(const char *path, struct fuse_file_info *fi)
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, file info: %p.\n", __FUNCTION__, __LINE__, path, fi);
 
+	if (1 == kpfs_is_swap_file(path))
+		return -ENOTSUP;
+
 	if (fi->flags & (O_RDWR | O_WRONLY)) {
 		tmpfile = kpfs_get_tmpfile(fi);
 		response = kpfs_api_upload_file((char *)path, tmpfile);
@@ -394,6 +412,9 @@ static int kpfs_open(const char *path, struct fuse_file_info *fi)
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, file info: %p.\n", __FUNCTION__, __LINE__, path, fi);
 
+	if (1 == kpfs_is_swap_file(path))
+		return -ENOTSUP;
+
 	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
 	if (NULL == node)
 		return -1;
@@ -416,6 +437,9 @@ static int kpfs_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, mode: %d, file info: %p.\n", __FUNCTION__, __LINE__, path, mode, fi);
+
+	if (1 == kpfs_is_swap_file(path))
+		return -ENOTSUP;
 
 	tmpfile = kpfs_gen_tmp_fullpath(path);
 
