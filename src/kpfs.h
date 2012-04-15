@@ -47,7 +47,8 @@
 
 #define KPFS_API_BASE_URL		"http://openapi.kuaipan.cn/"
 #define KPFS_API_VERSION		"1"
-#define KPFS_API_ROOT			"kuaipan"
+#define KPFS_API_ROOT_KUAIPAN		"kuaipan"
+#define KPFS_API_ROOT_APP_FOLDER	"app_folder"
 #define KPFS_API_ACCOUNT_INFO		KPFS_API_BASE_URL KPFS_API_VERSION "/account_info"
 #define KPFS_API_METADATA		KPFS_API_BASE_URL KPFS_API_VERSION "/metadata"
 #define KPFS_API_CREATE_FOLDER		KPFS_API_BASE_URL KPFS_API_VERSION "/fileops/create_folder"
@@ -87,6 +88,7 @@
 
 #define KPFS_CONF_ID_CONSUMER_KEY	"consumer_key"
 #define KPFS_CONF_ID_CONSUMER_SECRET	"consumer_secret"
+#define KPFS_CONF_ID_ROOT		"root"
 #define KPFS_CONF_ID_MOUNT_POINT	"mount_point"
 #define KPFS_CONF_ID_OAUTH_JSON_FILE	"oauth_json_file"
 #define KPFS_CONF_ID_WRITABLE_TMP_PATH	"writable_tmp_path"

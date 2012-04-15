@@ -188,11 +188,6 @@ char *kpfs_api_account_info()
 	return kpfs_api_common_request(KPFS_API_ACCOUNT_INFO);
 }
 
-static char *kpfs_api_root_get()
-{
-	return KPFS_API_ROOT;
-}
-
 char *kpfs_api_metadata(const char *path)
 {
 	char fullpath[1024] = { 0 };
@@ -202,7 +197,7 @@ char *kpfs_api_metadata(const char *path)
 	if (NULL == path_escape)
 		return NULL;
 
-	snprintf(fullpath, sizeof(fullpath), "%s%s%s", KPFS_API_METADATA "/", kpfs_api_root_get(), path_escape);
+	snprintf(fullpath, sizeof(fullpath), "%s%s%s", KPFS_API_METADATA "/", kpfs_conf_get_root(), path_escape);
 	KPFS_SAFE_FREE(path_escape);
 	KPFS_FILE_LOG("fullpath: %s\n", fullpath);
 	return kpfs_api_common_request(fullpath);
@@ -224,7 +219,7 @@ char *kpfs_api_download_link_create(const char *path)
 		return ret;
 
 	KPFS_FILE_LOG("request url: %s ...\n", url);
-	root = kpfs_api_root_get();
+	root = kpfs_conf_get_root();
 	len = strlen(url) + strlen(root) + strlen(path) + malloc_more_room;
 	url_with_path = calloc(len, 1);
 	if (NULL == url_with_path)
@@ -248,7 +243,7 @@ char *kpfs_api_download_link_create(const char *path)
 kpfs_ret kpfs_api_create_folder(const char *path)
 {
 	char *response = NULL;
-	response = kpfs_api_common_request_with_path(KPFS_API_CREATE_FOLDER, kpfs_api_root_get(), (char *)path);
+	response = kpfs_api_common_request_with_path(KPFS_API_CREATE_FOLDER, kpfs_conf_get_root(), (char *)path);
 	KPFS_SAFE_FREE(response);
 	return KPFS_RET_OK;
 }
@@ -282,7 +277,7 @@ char *kpfs_api_upload_file(char *dest_fullpath, char *src_fullpath)
 		return ret;
 
 	KPFS_FILE_LOG("request url: %s ...\n", url);
-	root = kpfs_api_root_get();
+	root = kpfs_conf_get_root();
 
 	dest_fullpath_escape = oauth_url_escape(dest_fullpath);
 	if (NULL == dest_fullpath_escape)
@@ -326,7 +321,7 @@ error_out:
 kpfs_ret kpfs_api_delete(const char *path)
 {
 	char *response = NULL;
-	response = kpfs_api_common_request_with_path(KPFS_API_DELETE, kpfs_api_root_get(), (char *)path);
+	response = kpfs_api_common_request_with_path(KPFS_API_DELETE, kpfs_conf_get_root(), (char *)path);
 	KPFS_SAFE_FREE(response);
 	return KPFS_RET_OK;
 }
@@ -334,7 +329,7 @@ kpfs_ret kpfs_api_delete(const char *path)
 kpfs_ret kpfs_api_move(const char *from_path, const char *to_path)
 {
 	char *response = NULL;
-	response = kpfs_api_common_request_from_to(KPFS_API_MOVE, kpfs_api_root_get(), (char *)from_path, (char *)to_path);
+	response = kpfs_api_common_request_from_to(KPFS_API_MOVE, kpfs_conf_get_root(), (char *)from_path, (char *)to_path);
 	KPFS_SAFE_FREE(response);
 	return KPFS_RET_OK;
 }
