@@ -45,6 +45,11 @@ char *kpfs_conf_get_consumer_secret()
 	return g_kpfs_conf.consumer_secret;
 }
 
+char *kpfs_conf_get_root()
+{
+	return g_kpfs_conf.root;
+}
+
 char *kpfs_conf_get_mount_point()
 {
 	return g_kpfs_conf.mount_point;
@@ -81,6 +86,13 @@ static kpfs_ret kpfs_conf_parse_json(const char *buf)
 		} else if (!strcmp(key, KPFS_CONF_ID_CONSUMER_SECRET)) {
 			if (json_type_string == json_object_get_type(val))
 				snprintf(g_kpfs_conf.consumer_secret, sizeof(g_kpfs_conf.consumer_secret), "%s", json_object_get_string(val));
+		} else if (!strcmp(key, KPFS_CONF_ID_ROOT)) {
+			if (json_type_string == json_object_get_type(val)) {
+				snprintf(g_kpfs_conf.root, sizeof(g_kpfs_conf.root), "%s", json_object_get_string(val));
+				if (0 != strcmp(KPFS_API_ROOT_KUAIPAN, g_kpfs_conf.root) && 0 != strcmp(KPFS_API_ROOT_APP_FOLDER, g_kpfs_conf.root)) {
+					snprintf(g_kpfs_conf.root, sizeof(g_kpfs_conf.root), "%s", KPFS_API_ROOT_KUAIPAN);
+				}
+			}
 		} else if (!strcmp(key, KPFS_CONF_ID_MOUNT_POINT)) {
 			if (json_type_string == json_object_get_type(val))
 				snprintf(g_kpfs_conf.mount_point, sizeof(g_kpfs_conf.mount_point), "%s", json_object_get_string(val));
@@ -102,6 +114,8 @@ static kpfs_ret kpfs_conf_parse_json(const char *buf)
 		snprintf(g_kpfs_conf.consumer_key, sizeof(g_kpfs_conf.consumer_key), "%s", KPFS_CONSUMER_KEY);
 	if (g_kpfs_conf.consumer_secret[0] == '\0')
 		snprintf(g_kpfs_conf.consumer_secret, sizeof(g_kpfs_conf.consumer_secret), "%s", KPFS_CONSUMER_SECRET);
+	if (g_kpfs_conf.root[0] == '\0')
+		snprintf(g_kpfs_conf.root, sizeof(g_kpfs_conf.root), "%s", KPFS_API_ROOT_KUAIPAN);
 	if (g_kpfs_conf.oauth_json_file[0] == '\0')
 		snprintf(g_kpfs_conf.oauth_json_file, sizeof(g_kpfs_conf.oauth_json_file), "%s", KPFS_DEFAULT_OAUTH_JSON_FILE);
 	if (g_kpfs_conf.writable_tmp_path[0] == '\0')
@@ -149,6 +163,7 @@ void kpfs_conf_dump()
 	KPFS_LOG("kpfs conf:\n");
 	KPFS_LOG("\tconsumer_key: %s\n", g_kpfs_conf.consumer_key);
 	KPFS_LOG("\tconsumer_secret: %s\n", g_kpfs_conf.consumer_secret);
+	KPFS_LOG("\troot: %s\n", g_kpfs_conf.root);
 	KPFS_LOG("\tmount_point: %s\n", g_kpfs_conf.mount_point);
 	KPFS_LOG("\toauth_json_file: %s\n", g_kpfs_conf.oauth_json_file);
 	KPFS_LOG("\twritable_tmp_path: %s\n", g_kpfs_conf.writable_tmp_path);

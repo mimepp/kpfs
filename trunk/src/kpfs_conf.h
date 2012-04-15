@@ -30,6 +30,7 @@ typedef struct kpfs_conf_t kpfs_conf;
 struct kpfs_conf_t {
 	char consumer_key[64];
 	char consumer_secret[64];
+	char root[64];
 	char mount_point[KPFS_MAX_PATH];
 	char oauth_json_file[KPFS_MAX_PATH];
 	char writable_tmp_path[KPFS_MAX_PATH];
@@ -37,6 +38,7 @@ struct kpfs_conf_t {
 
 char *kpfs_conf_get_consumer_key();
 char *kpfs_conf_get_consumer_secret();
+char *kpfs_conf_get_root();
 char *kpfs_conf_get_mount_point();
 char *kpfs_conf_get_oauth_json_file();
 char *kpfs_conf_get_writable_tmp_path();

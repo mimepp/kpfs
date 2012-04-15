@@ -1,6 +1,7 @@
 {
 	"consumer_key": "xc8D2NfL9c53vkrP",
 	"consumer_secret": "p7Lo7Q6XBMipbHBw",
+	"root": "kuaipan",
 	"mount_point": "/tmp/kpfs",
 	"oauth_json_file": "/tmp/kpfs_oauth.json",
 	"writable_tmp_path": "/tmp"
