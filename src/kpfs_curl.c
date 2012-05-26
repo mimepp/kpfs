@@ -86,7 +86,7 @@ int kpfs_curl_range_get(const char *url, char *buf, curl_off_t start_pos, curl_o
 
 	curl_handle = curl_easy_init();
 
-	snprintf(range, sizeof(range), "%lld-%lld", start_pos, end_pos);
+	snprintf(range, sizeof(range), CURL_FORMAT_OFF_T "-" CURL_FORMAT_OFF_T, start_pos, end_pos);
 	KPFS_FILE_LOG("range = %s.\n", range);
 
 	curl_easy_reset(curl_handle);
