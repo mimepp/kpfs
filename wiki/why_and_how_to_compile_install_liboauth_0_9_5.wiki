@@ -25,6 +25,8 @@ but when call oauth_sign_url2(url, ....), then it will return:
 [2012-03-30 23:30:07] return url:
 http://openapi.kuaipan.cn/1/metadata/kuaipan//demo/中文目录_02?oauth_consumer_key=xc8D2NfL9c53vkrP&oauth_nonce=Jgj5PGrU_xyioRZeKU5FNBO&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1333121407&oauth_token=32a7d5efb0d5442e8e32c6d7518e8239&oauth_version=1.0&oauth_signature=%2Fk0kgBPAvY%2F1NgNCvOxAgAkWt90%3D<http://openapi.kuaipan.cn/1/metadata/kuaipan//demo/%E4%B8%AD%E6%96%87%E7%9B%AE%E5%BD%95_02?oauth_consumer_key=xc8D2NfL9c53vkrP&oauth_nonce=Jgj5PGrU_xyioRZeKU5FNBO&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1333121407&oauth_token=32a7d5efb0d5442e8e32c6d7518e8239&oauth_version=1.0&oauth_signature=%2Fk0kgBPAvY%2F1NgNCvOxAgAkWt90%3D>
 }}}
+ * changeset for kpfs:
+  * [http://code.google.com/p/kpfs/source/detail?r=7 it could not get chinese dir metadata from kuaipan.]
 
 = How to compile and install liboauth-0.9.5 =
  * Download liboauth-0.9.5
