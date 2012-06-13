@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <time.h>
+#include <curl/curl.h>
 
 #define __STRICT_ANSI__
 #include <json/json.h>
@@ -150,7 +151,7 @@ void kpfs_node_dump(kpfs_node * node)
 	KPFS_FILE_LOG("\trevision: %s\n", node->revision);
 	KPFS_FILE_LOG("\ttype: %d (0:file, 1: folder)\n", node->type);
 	KPFS_FILE_LOG("\tis_deleted: %d\n", node->is_deleted);
-	KPFS_FILE_LOG("\tst.st_size: %lld\n", node->st.st_size);
+	KPFS_FILE_LOG("\tst.st_size: " CURL_FORMAT_OFF_T "\n", node->st.st_size);
 	KPFS_FILE_LOG("\tst.st_ctime: %lu\n", node->st.st_ctime);
 	KPFS_FILE_LOG("\tst.st_mtime: %lu\n", node->st.st_mtime);
 }
@@ -172,7 +173,7 @@ int kpfs_node_get_root_path()
 
 	p = strstr(response, KPFS_ID_QUOTA_TOTAL);
 	if (p) {
-		sscanf(p, KPFS_ID_QUOTA_TOTAL "\": %llu,", &quota_total);
+		sscanf(p, KPFS_ID_QUOTA_TOTAL "\": " CURL_FORMAT_OFF_T ",", &quota_total);
 	}
 
 	jobj = json_tokener_parse(response);
