@@ -1,3 +1,6 @@
+2012-08-13 Tao Yu <yut616@gmail.com>
+	* release 0.1 since kpfs works for read/write from kuaipan.cn.
+
 2012-04-15 Tao Yu <yut616@gmail.com>
 	* refine the write related function, we will not upload swap file, e.g. swp.
 	* now write function could work.
