@@ -44,3 +44,37 @@ kpfs_HEADERS = \
 	kpfs_curl.h	\
 	kpfs_node.h	\
 	kpfs_oauth.h
+
+CLEANFILES =
+
+if WITH_GOBJECT_INTROSPECTION
+kpfs-1.0.gir: $(lib_LTLIBRARIES) $(G_IR_SCANNER) Makefile.am
+	$(G_IR_SCANNER) \
+	--warn-all \
+	-v \
+	--namespace kpfs \
+	--nsversion 1.0 \
+	--add-include-path=$(srcdir) \
+	--add-include-path=$(builddir) \
+	--library=$(lib_LTLIBRARIES) \
+	--output $@ \
+	--verbose \
+	--pkg=glib-2.0 \
+	$(kpfs_HEADERS) \
+	$(libkpfs_la_SOURCES)
+
+girdir = $(datadir)/gir-1.0
+gir_DATA = kpfs-1.0.gir
+
+typelibsdir = $(libdir)/girepository-1.0
+typelibs_DATA = kpfs-1.0.typelib
+
+$(typelibs_DATA): $(gir_DATA)
+	g-ir-compiler \
+	--includedir=$(srcdir) \
+	--includedir=$(builddir) \
+	-o $@ $<
+
+CLEANFILES += kpfs-1.0.gir $(typelibs_DATA)
+
+endif # WITH_GOBJECT_INTROSPECTION
