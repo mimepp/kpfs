@@ -24,9 +24,9 @@
 #ifndef	__KPFS_UTIL_H__
 #define	__KPFS_UTIL_H__
 
+#include <stdio.h>
 #include "kpfs.h"
 
-int kpfs_file_log(const char *fmt, ...);
 kpfs_ret kpfs_util_account_info_store(char *user_name, char *user_id, off_t quota_total, off_t quota_used, off_t max_file_size);
 off_t kpfs_util_account_quota_total_get();
 off_t kpfs_util_account_quota_used_get();
