@@ -3,10 +3,12 @@ INCLUDES = \
 	 -g	\
 	-I$(abs_top_srcdir)/src
 
-MYLDFLAGS = \
-	$(abs_top_builddir)/src/libkpfs.la	\
+KPFS_LIB_LDFLAGS = \
 	-ljson	\
 	-lglib-2.0	\
 	-lcurl		\
 	-loauth
 
+KPFS_BIN_LDFLAGS = \
+	$(abs_top_builddir)/src/libkpfs.la	\
+	$(KPFS_LIB_LDFLAGS)

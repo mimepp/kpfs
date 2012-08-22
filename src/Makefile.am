@@ -15,6 +15,8 @@ libkpfs_la_SOURCES = \
 	kpfs_node.c	\
 	kpfs_oauth.c
 	
+libkpfs_la_LIBADD = $(KPFS_LIB_LDFLAGS)
+
 AM_CPPFLAGS = -DFUSE_USE_VERSION=26
 
 bin_PROGRAMS = kpfs
@@ -23,7 +25,7 @@ kpfs_SOURCES = \
 	kpfs.h		\
 	kpfs.c
 
-kpfs_LDADD = $(MYLDFLAGS)
+kpfs_LDADD = $(KPFS_BIN_LDFLAGS)
 
 EXTRA_DIST = \
 	rules.mk	\
