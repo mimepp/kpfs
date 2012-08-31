@@ -24,6 +24,6 @@
 #ifndef	__KPFS_CURL_H__
 #define	__KPFS_CURL_H__
 
-int kpfs_curl_range_get(const char *url, char *buf, long long start_pos, long long end_pos);
+int kpfs_curl_range_get(const char *url, char *buf, off_t start_pos, off_t end_pos);
 int kpfs_curl_upload(const char *url, char *file, char *reply);
 #endif
