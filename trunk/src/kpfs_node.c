@@ -75,12 +75,12 @@ void kpfs_node_free(gpointer p)
 	pthread_mutex_destroy(&(node->mutex));
 }
 
-kpfs_node *kpfs_node_root_get()
+const kpfs_node *kpfs_node_root_get()
 {
 	return g_kpfs_node_root;
 }
 
-kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size)
+const kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size)
 {
 	kpfs_node *root = NULL;
 
@@ -107,7 +107,7 @@ kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size)
 	return g_kpfs_node_root;
 }
 
-kpfs_node *kpfs_node_get_by_path(kpfs_node * node, const char *path)
+const kpfs_node *kpfs_node_get_by_path(kpfs_node * node, const char *path)
 {
 	kpfs_node *ret = NULL;
 	GHashTableIter iter;
@@ -127,7 +127,7 @@ kpfs_node *kpfs_node_get_by_path(kpfs_node * node, const char *path)
 		g_hash_table_iter_init(&iter, node->sub_nodes);
 		while (g_hash_table_iter_next(&iter, (gpointer *) & key, (gpointer *) & value)) {
 			KPFS_LOG("[%s:%d] iter, key: %s, path: %s\n", __FUNCTION__, __LINE__, key, path);
-			ret = kpfs_node_get_by_path(value, path);
+			ret = (kpfs_node *) kpfs_node_get_by_path(value, path);
 			if (ret)
 				return ret;
 		}

@@ -52,7 +52,7 @@ CLEANFILES =
 if WITH_GOBJECT_INTROSPECTION
 kpfs-1.0.gir: $(lib_LTLIBRARIES) $(G_IR_SCANNER) Makefile.am
 	$(G_IR_SCANNER) \
-	--warn-all \
+	--warn-error \
 	-v \
 	--namespace kpfs \
 	--nsversion 1.0 \

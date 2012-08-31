@@ -116,7 +116,7 @@ static int kpfs_getattr(const char *path, struct stat *stbuf)
 		KPFS_FILE_LOG("we will not handle %s\n", path);
 		return -1;
 	}
-	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
 	if (NULL == node) {
 		KPFS_FILE_LOG("%s:%d, could not find: %s\n", __FUNCTION__, __LINE__, path);
 		return -ENOENT;
@@ -144,7 +144,7 @@ static int kpfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
 
-	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
 	if (node) {
 		GHashTableIter iter;
 		char *key = NULL;
@@ -176,7 +176,7 @@ static int kpfs_read(const char *path, char *rbuf, size_t size, off_t offset, st
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, rbuf:%s, size: %lu, offset: %lu, file info: %p\n", __FUNCTION__, __LINE__, path, rbuf, size, offset, fi);
 
-	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
 	if (NULL == node)
 		return -1;
 
@@ -244,7 +244,7 @@ static int kpfs_mkdir(const char *path, mode_t mode)
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s, mode: %d.\n", __FUNCTION__, __LINE__, path, mode);
 
-	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
 	if (node) {
 		KPFS_FILE_LOG("[%s:%d] kpfs_mkdir, %s is existed.\n", __FUNCTION__, __LINE__, path);
 		return -EEXIST;
@@ -254,19 +254,19 @@ static int kpfs_mkdir(const char *path, mode_t mode)
 
 	p = strrchr(path, '/');
 	if (p == path)
-		parent_node = kpfs_node_root_get();
+		parent_node = (kpfs_node *) kpfs_node_root_get();
 	else {
 		tmp = (char *)path;
 		while (1) {
 			memset(parent_path, 0, sizeof(parent_path));
 			strncpy(parent_path, tmp, p - tmp);
-			parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);;
+			parent_node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);;
 			if (parent_node)
 				break;
 			p = strrchr(parent_path, '/');
 			tmp = parent_path;
 			if (p == parent_path) {
-				parent_node = kpfs_node_root_get();
+				parent_node = (kpfs_node *) kpfs_node_root_get();
 				break;
 			}
 		};
@@ -289,7 +289,7 @@ static int kpfs_delete(const char *path)
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] path: %s.\n", __FUNCTION__, __LINE__, path);
 
-	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
 	if (NULL == node) {
 		KPFS_FILE_LOG("[%s:%d] %s is not existed.\n", __FUNCTION__, __LINE__, path);
 		return -EEXIST;
@@ -298,7 +298,7 @@ static int kpfs_delete(const char *path)
 		return -1;
 
 	parent_path = kpfs_util_get_parent_path((char *)path);
-	parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
+	parent_node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
 	KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
 	KPFS_SAFE_FREE(parent_path);
 
@@ -337,7 +337,7 @@ static int kpfs_release(const char *path, struct fuse_file_info *fi)
 		KPFS_SAFE_FREE(response);
 
 		parent_path = kpfs_util_get_parent_path((char *)path);
-		parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
+		parent_node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
 		KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
 		kpfs_node_rebuild(parent_node);
 		KPFS_SAFE_FREE(parent_path);
@@ -357,7 +357,7 @@ static int kpfs_rename(const char *from, const char *to)
 	KPFS_FILE_LOG("[%s:%d] enter\n", __FUNCTION__, __LINE__);
 	KPFS_FILE_LOG("[%s:%d] from: %s, to: %s.\n", __FUNCTION__, __LINE__, from, to);
 
-	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), from);
+	node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), from);
 	if (NULL == node) {
 		KPFS_FILE_LOG("[%s:%d] %s is not existed.\n", __FUNCTION__, __LINE__, from);
 		return -EEXIST;
@@ -366,7 +366,7 @@ static int kpfs_rename(const char *from, const char *to)
 		return -1;
 
 	parent_path = kpfs_util_get_parent_path((char *)from);
-	parent_node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
+	parent_node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), parent_path);
 	KPFS_FILE_LOG("[%s:%d] parent_path: %s, fullpath: %s\n", __FUNCTION__, __LINE__, parent_path, parent_node->fullpath);
 	KPFS_SAFE_FREE(parent_path);
 
@@ -415,7 +415,7 @@ static int kpfs_open(const char *path, struct fuse_file_info *fi)
 	if (1 == kpfs_is_swap_file(path))
 		return -ENOTSUP;
 
-	node = kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
+	node = (kpfs_node *) kpfs_node_get_by_path((kpfs_node *) kpfs_node_root_get(), path);
 	if (NULL == node)
 		return -1;
 	if ((fi->flags & O_ACCMODE) == O_RDONLY) {

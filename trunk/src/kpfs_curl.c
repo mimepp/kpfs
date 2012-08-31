@@ -67,7 +67,7 @@ char *kpfs_curl_fetch(const char *url)
 	return buf;
 }
 
-int kpfs_curl_range_get(const char *url, char *buf, curl_off_t start_pos, curl_off_t end_pos)
+int kpfs_curl_range_get(const char *url, char *buf, long long start_pos, long long end_pos)
 {
 	CURL *curl_handle = NULL;
 	CURLcode ret = CURLE_GOT_NOTHING;

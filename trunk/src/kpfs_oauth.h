@@ -27,7 +27,7 @@
 #include <string.h>
 #include "kpfs.h"
 
-typedef struct _kpfs_oauth {
+typedef struct {
 	char oauth_token_secret[64];
 	char oauth_token[64];
 	char oauth_verifier[64];

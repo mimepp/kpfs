@@ -31,9 +31,7 @@ typedef enum {
 	KPFS_NODE_TYPE_FOLDER
 } kpfs_node_type;
 
-typedef struct kpfs_node_t kpfs_node;
-
-struct kpfs_node_t {
+typedef struct {
 	char *fullpath;
 	char *id;
 	char *name;
@@ -43,15 +41,15 @@ struct kpfs_node_t {
 	struct stat st;
 	pthread_mutex_t mutex;
 	GHashTable *sub_nodes;
-};
+} kpfs_node;
 
 #define KPFS_NODE_LOCK(node)	pthread_mutex_lock(&(node->mutex));
 #define KPFS_NODE_UNLOCK(node)	pthread_mutex_unlock(&(node->mutex));
 
-kpfs_node *kpfs_node_root_get();
-kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size);
+const kpfs_node *kpfs_node_root_get();
+const kpfs_node *kpfs_node_root_create(char *id, char *name, off_t size);
 void kpfs_node_free(gpointer p);
-kpfs_node *kpfs_node_get_by_path(kpfs_node * node, const char *path);
+const kpfs_node *kpfs_node_get_by_path(kpfs_node * node, const char *path);
 void kpfs_node_dump(kpfs_node * node);
 int kpfs_node_get_root_path();
 kpfs_ret kpfs_node_parse_dir(kpfs_node * parent_node, const char *path);
