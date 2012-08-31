@@ -1,5 +1,6 @@
 2012-08-31 Tao Yu <yut616@gmail.com>
 	* remove some warnings in g-ir-scanner
+	* use off_t and "-D_FILE_OFFSET_BITS=64" to let kpfs_curl_range_get be introspected.
 
 2012-08-22 Tao Yu <yut616@gmail.com>
 	* support gobject introspection, you could try javascript and python binding now.
