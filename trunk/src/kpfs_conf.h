@@ -26,15 +26,14 @@
 
 #include "kpfs.h"
 
-typedef struct kpfs_conf_t kpfs_conf;
-struct kpfs_conf_t {
+typedef struct {
 	char consumer_key[64];
 	char consumer_secret[64];
 	char root[64];
 	char mount_point[KPFS_MAX_PATH];
 	char oauth_json_file[KPFS_MAX_PATH];
 	char writable_tmp_path[KPFS_MAX_PATH];
-};
+} kpfs_conf;
 
 char *kpfs_conf_get_consumer_key();
 char *kpfs_conf_get_consumer_secret();
