@@ -1,3 +1,6 @@
+2012-08-31 Tao Yu <yut616@gmail.com>
+	* remove some warnings in g-ir-scanner
+
 2012-08-22 Tao Yu <yut616@gmail.com>
 	* support gobject introspection, you could try javascript and python binding now.
 
