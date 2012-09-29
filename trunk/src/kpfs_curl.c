@@ -58,6 +58,8 @@ char *kpfs_curl_fetch(const char *url)
 	data.buf = buf;
 	data.count = 0;
 
+	curl_easy_reset(curl);
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&data);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_func);
@@ -113,6 +115,8 @@ int kpfs_curl_range_get(const char *url, char *buf, off_t start_pos, off_t end_p
 	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, errbuf);
 
 	curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
+
+	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 
 	ret = curl_easy_perform(curl_handle);
 
@@ -173,6 +177,8 @@ int kpfs_curl_upload(const char *url, char *file, char *reply)
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
+
+	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
 
 	ret = curl_easy_perform(curl_handle);
 
