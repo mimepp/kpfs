@@ -33,7 +33,7 @@ http://openapi.kuaipan.cn/1/metadata/kuaipan//demo/中文目录_02?oauth_consume
  * Download liboauth-0.9.5
   * http://liboauth.sourceforge.net/
  * compile
-  * ./configure --enable-nss
+  * ./configure --enable-nss --with-curltimeout
   * make
  * install
   * sudo make install
