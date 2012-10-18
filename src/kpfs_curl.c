@@ -60,11 +60,13 @@ char *kpfs_curl_fetch(const char *url)
 
 	curl_easy_reset(curl);
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&data);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_func);
 	ret = curl_easy_perform(curl);
-	printf("curl_easy_perform return value: %d\n", ret);
+	printf("curl_easy_perform return value: %d (%s)\n", ret, curl_easy_strerror(ret));
 	curl_easy_cleanup(curl);
 	return buf;
 }

@@ -26,4 +26,5 @@
 
 int kpfs_curl_range_get(const char *url, char *buf, off_t start_pos, off_t end_pos);
 int kpfs_curl_upload(const char *url, char *file, char *reply);
+char *kpfs_curl_fetch(const char *url);
 #endif
