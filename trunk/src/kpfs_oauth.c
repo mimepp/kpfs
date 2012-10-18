@@ -35,6 +35,7 @@
 #include "kpfs.h"
 #include "kpfs_oauth.h"
 #include "kpfs_conf.h"
+#include "kpfs_curl.h"
 
 #define OAUTH_TOKEN_ID		"oauth_token"
 #define OAUTH_TOKEN_SECRET_ID	"oauth_token_secret"
@@ -175,9 +176,10 @@ kpfs_ret kpfs_oauth_request_token()
 		goto error_out;
 	}
 
-	reply = oauth_http_get(req_url, NULL);
+	reply = kpfs_curl_fetch(req_url);
 
 	if (!reply) {
+		KPFS_LOG("request_token_uri fails.\n");
 		ret = KPFS_RET_FAIL;
 		goto error_out;
 	}
@@ -242,7 +244,7 @@ kpfs_ret kpfs_oauth_access_token()
 		goto error_out;
 	}
 
-	reply = oauth_http_get(req_url, NULL);
+	reply = kpfs_curl_fetch(req_url);
 
 	if (!reply) {
 		ret = KPFS_RET_FAIL;
