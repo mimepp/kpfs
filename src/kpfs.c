@@ -187,6 +187,8 @@ static int kpfs_read(const char *path, char *rbuf, size_t size, off_t offset, st
 		end_pos = node->st.st_size - 1;
 	else
 		end_pos = offset + size - 1;
+	if (end_pos < 0)
+		end_pos = 0;
 	ret = kpfs_curl_range_get(url, rbuf, offset, end_pos);
 	KPFS_SAFE_FREE(url);
 	return ret;
