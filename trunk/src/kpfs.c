@@ -170,6 +170,7 @@ static int kpfs_read(const char *path, char *rbuf, size_t size, off_t offset, st
 	char *url = NULL;
 	kpfs_node *node = NULL;
 	int ret = 0;
+	off_t end_pos = 0;
 
 	if (NULL == path || NULL == rbuf)
 		return -1;
@@ -181,7 +182,12 @@ static int kpfs_read(const char *path, char *rbuf, size_t size, off_t offset, st
 		return -1;
 
 	url = kpfs_api_download_link_create(path);
-	ret = kpfs_curl_range_get(url, rbuf, offset, offset + size - 1);
+
+	if ((offset + size) > node->st.st_size)
+		end_pos = node->st.st_size - 1;
+	else
+		end_pos = offset + size - 1;
+	ret = kpfs_curl_range_get(url, rbuf, offset, end_pos);
 	KPFS_SAFE_FREE(url);
 	return ret;
 }
