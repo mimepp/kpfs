@@ -82,6 +82,8 @@ int kpfs_curl_range_get(const char *url, char *buf, off_t start_pos, off_t end_p
 
 	if (NULL == url || NULL == buf)
 		return -1;
+	if (start_pos < 0 || end_pos < 0)
+		return -1;
 
 	memset(buf, 0, end_pos - start_pos);
 
