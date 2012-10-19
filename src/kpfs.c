@@ -505,8 +505,13 @@ int main(int argc, char *argv[])
 	kpfs_ret ret = KPFS_RET_OK;
 	int fuse_ret = 0;
 	struct stat st;
+#ifdef KPFS_FUSE_DEBUG
+	int fuse_argc = 3;
+	char *fuse_argv[3] = { 0 };
+#else
 	int fuse_argc = 2;
 	char *fuse_argv[2] = { 0 };
+#endif
 
 	if (argc < 3) {
 		kpfs_usage(argv[0]);
@@ -536,6 +541,14 @@ int main(int argc, char *argv[])
 			}
 			snprintf(fuse_argv[0], KPFS_MAX_PATH, "%s", argv[0]);
 			snprintf(fuse_argv[1], KPFS_MAX_PATH, "%s", kpfs_conf_get_mount_point());
+#ifdef KPFS_FUSE_DEBUG
+			fuse_argv[2] = calloc(KPFS_MAX_BUF, 1);
+			if (NULL == fuse_argv[2]) {
+				printf("%s:%d, calloc fail.\n", __FUNCTION__, __LINE__);
+				return -1;
+			}
+			snprintf(fuse_argv[2], KPFS_MAX_BUF, "%s", "-d");
+#endif
 		}
 	} else {
 		kpfs_usage(argv[0]);
