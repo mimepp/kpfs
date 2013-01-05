@@ -14,3 +14,6 @@ EXTRA_DIST = autogen.sh kpfs.pc.in gtk-doc.make
 
 kpfsdir = $(includedir)/kpfs
 kpfs_HEADERS = config.h
+
+indent:
+	indent -npro -kr -i8 -ts8 -sob -l160 -ss -ncs -cp1 -il0 src/*.c src/*.h src/tests/*.c
