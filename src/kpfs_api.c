@@ -52,7 +52,7 @@ static char *kpfs_api_common_request(char *url)
 
 	KPFS_FILE_LOG("real url: %s.\n", req_url);
 
-	reply = oauth_http_get(req_url, NULL);
+	reply = kpfs_curl_fetch(req_url);
 
 	if (!reply) {
 		goto error_out;
@@ -107,7 +107,7 @@ static char *kpfs_api_common_request_with_path(char *url, char *root, char *path
 
 	KPFS_FILE_LOG("real url: %s.\n", req_url);
 
-	reply = oauth_http_get(req_url, NULL);
+	reply = kpfs_curl_fetch(req_url);
 
 	if (!reply) {
 		goto error_out;
@@ -165,7 +165,7 @@ static char *kpfs_api_common_request_from_to(char *url, char *root, char *from_p
 
 	KPFS_FILE_LOG("real url: %s.\n", req_url);
 
-	reply = oauth_http_get(req_url, NULL);
+	reply = kpfs_curl_fetch(req_url);
 
 	if (!reply) {
 		goto error_out;
