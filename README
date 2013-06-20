@@ -13,6 +13,8 @@ o prepare before configure
   sudo apt-get install gtk-doc-tools libfuse-dev libjson0-dev libcurl4-nss-dev liboauth-dev
 
   - liboauth will be used for oauth to kuaipan.cn
+    - maybe you should compile liboauth by yourself
+    - http://code.google.com/p/kpfs/wiki/why_and_how_to_compile_install_liboauth_0_9_5
   - json-c will be used for parse response of request to kuaipan, and load/save kpfs.conf and kpfs_oauth.json
   - glib will be used for hash table
 
