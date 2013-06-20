@@ -217,8 +217,8 @@ kpfs_ret kpfs_oauth_authorize()
 	printf("this application to access your kuaipan\n");
 	printf("Please enter the authorization number here: \n");
 
-	str = gets(g_kpfs_oauth.oauth_verifier);
-	KPFS_LOG("\ngets: ret %s, oauth_verifier: %s\n", str, g_kpfs_oauth.oauth_verifier);
+	str = fgets(g_kpfs_oauth.oauth_verifier, sizeof(g_kpfs_oauth.oauth_verifier), stdin);
+	KPFS_LOG("\ngets: ret %s\noauth_verifier: %s\n", str, g_kpfs_oauth.oauth_verifier);
 	if (g_kpfs_oauth.oauth_verifier[0] != '\0') {
 		return KPFS_RET_OK;
 	}
