@@ -32,7 +32,7 @@
 #include <curl/curl.h>
 
 #define __STRICT_ANSI__
-#include <json/json.h>
+#include <json-c/json.h>
 
 #include "kpfs.h"
 #include "kpfs_node.h"

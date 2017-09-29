@@ -4,7 +4,7 @@ INCLUDES = \
 	-I$(abs_top_srcdir)/src
 
 KPFS_LIB_LDFLAGS = \
-	-ljson	\
+	-ljson-c	\
 	-lglib-2.0	\
 	-lcurl		\
 	-loauth

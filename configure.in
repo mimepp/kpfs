@@ -14,7 +14,7 @@ export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 PKG_CHECK_MODULES(GLIB, [glib-2.0])
 PKG_CHECK_MODULES(FUSE, [fuse >= 2.2])
 PKG_CHECK_MODULES(OAUTH, [oauth >= 0.9.5])
-PKG_CHECK_MODULES(JSON, [json])
+PKG_CHECK_MODULES(JSON, [json-c])
 
 LIBCURL_CHECK_CONFIG([yes], [7.17.0], [], [AC_MSG_ERROR(["libcurl not found"])])
 if test "$libcurl_protocol_HTTP" != yes; then
